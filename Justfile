@@ -54,11 +54,12 @@ estimate-matrix HASHCAT:
 registry := env("HASHCAT_BENCH_REGISTRY", "ghcr.io/bigpick/hashcat-bench")
 cuda_version := "12.9.1"
 
-build-image HASHCAT_VERSION:
+build-image HASHCAT_VERSION *ARGS:
     docker build \
         --build-arg HASHCAT_VERSION={{ HASHCAT_VERSION }} \
         --build-arg CUDA_VERSION={{ cuda_version }} \
         -t {{ registry }}:{{ HASHCAT_VERSION }}-cuda{{ cuda_version }} \
+        {{ ARGS }} \
         container/
 
 push-image HASHCAT_VERSION:

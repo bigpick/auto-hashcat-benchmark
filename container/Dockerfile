@@ -27,7 +27,7 @@ RUN git clone https://github.com/hashcat/hashcat.git /root/hashcat && \
     cd /root/hashcat && \
     git checkout ${HASHCAT_VERSION} && \
     git submodule update --init && \
-    CFLAGS="-O2 -march=x86-64" CXXFLAGS="-O2 -march=x86-64" make -j$(nproc) && \
+    make -j$(nproc) BUILD_MODE=cross && \
     make install && \
     rm -rf /root/hashcat/.git
 
