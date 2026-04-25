@@ -65,3 +65,9 @@ class VastProvider:
 
     def destroy_instance(self, instance_id: int) -> None:
         self._sdk.destroy_instance(id=instance_id)
+
+    def list_instances(self) -> list[dict]:
+        result = self._sdk.show_instances()
+        if result is None:
+            return []
+        return result

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from hashcat_bench.models import GpuModel
 from hashcat_bench.provider import VastProvider
 
-DEFAULT_RUNTIME_MINUTES = 15
+DEFAULT_RUNTIME_MINUTES = 45
 SAFETY_MULTIPLIER = 1.5
 
 @dataclass

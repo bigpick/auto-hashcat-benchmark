@@ -75,6 +75,9 @@ bench-matrix HASHCAT:
 bench-matrix-capped HASHCAT BUDGET:
     {{ python }} hashcat-bench --data-dir {{ data_dir }} bench-matrix --hashcat {{ HASHCAT }} --budget-cap {{ BUDGET }}
 
+cleanup:
+    {{ python }} hashcat-bench cleanup
+
 # --- Data ---
 
 build-index:

@@ -243,9 +243,50 @@ def bench_matrix_cmd(data_dir: Path, hashcat_version: str, kernel_mode: str = "o
         if total > budget_cap:
             print(f"Estimated cost ${total:.2f} exceeds budget cap ${budget_cap:.2f}. Aborting.")
             return
+
+    succeeded = []
+    failed = []
     for slug in missing_slugs:
         print(f"\n--- {slug} ---")
-        bench_cmd(data_dir, slug, hashcat_version, kernel_mode)
+        try:
+            bench_cmd(data_dir, slug, hashcat_version, kernel_mode)
+            succeeded.append(slug)
+        except Exception as e:
+            print(f"  FAILED: {e}", file=sys.stderr)
+            failed.append((slug, str(e)))
+
+    print(f"\n{'=' * 40}")
+    print(f"Matrix complete: {len(succeeded)} succeeded, {len(failed)} failed")
+    if failed:
+        print("\nFailed GPUs:")
+        for slug, err in failed:
+            print(f"  {slug}: {err}")
+
+
+def cleanup_cmd() -> None:
+    from hashcat_bench.provider import VastProvider
+    provider = VastProvider()
+    instances = provider.list_instances()
+    if not instances:
+        print("No active instances found.")
+        return
+    print(f"Found {len(instances)} active instance(s):\n")
+    for inst in instances:
+        inst_id = inst.get("id", "?")
+        status = inst.get("actual_status", "unknown")
+        gpu = inst.get("gpu_name", "unknown")
+        started = inst.get("start_date", "?")
+        print(f"  ID {inst_id:>8}  {gpu:20s}  status={status}  started={started}")
+
+    answer = input(f"\nDestroy all {len(instances)} instance(s)? [y/N] ")
+    if answer.strip().lower() == "y":
+        for inst in instances:
+            inst_id = inst["id"]
+            print(f"  Destroying {inst_id}...")
+            provider.destroy_instance(inst_id)
+        print("Done.")
+    else:
+        print("Aborted.")
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="hashcat-bench", description="Hashcat GPU benchmark orchestrator")
@@ -276,6 +317,7 @@ def main() -> None:
     p_bm.add_argument("--hashcat", required=True, help="Hashcat version")
     p_bm.add_argument("--kernel-mode", default="optimized", choices=["optimized", "default"])
     p_bm.add_argument("--budget-cap", type=float, help="Max $ to spend")
+    sub.add_parser("cleanup", help="List and destroy any active Vast.ai instances")
     args = parser.parse_args()
     if args.command == "build-index":
         build_index_cmd(args.data_dir)
@@ -297,3 +339,5 @@ def main() -> None:
         bench_cmd(args.data_dir, args.gpu, args.hashcat, args.kernel_mode)
     elif args.command == "bench-matrix":
         bench_matrix_cmd(args.data_dir, args.hashcat, args.kernel_mode, args.budget_cap)
+    elif args.command == "cleanup":
+        cleanup_cmd()
