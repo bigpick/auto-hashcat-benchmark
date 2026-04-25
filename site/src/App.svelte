@@ -56,6 +56,11 @@
   <div class="loading">Loading benchmark data...</div>
 {:else if error}
   <div class="error">Failed to load data: {error}</div>
+{:else if index.results.length === 0}
+  <div class="empty-state">
+    <h2>No benchmark data yet</h2>
+    <p>Benchmarks will appear here once results are collected. See the <a href="https://github.com/bigpick/auto-hashcat-benchmark">GitHub repo</a> for instructions on running benchmarks.</p>
+  </div>
 {:else}
   <div class="toolbar">
     <FilterBar

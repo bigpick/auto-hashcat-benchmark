@@ -1,5 +1,6 @@
 export async function loadIndex() {
-  const res = await fetch('./index.json');
+  const base = import.meta.env.BASE_URL || '/';
+  const res = await fetch(`${base}index.json`);
   return res.json();
 }
 

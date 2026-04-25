@@ -76,6 +76,22 @@ body {
   font-size: 0.95rem;
 }
 
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state h2 {
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.empty-state a {
+  color: var(--accent);
+}
+
 /* ===== Loading / Error ===== */
 .loading,
 .error {
