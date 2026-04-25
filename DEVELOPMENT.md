@@ -157,8 +157,8 @@ Edit `data/gpu-models.json` and add an entry:
 {"name": "RTX 4080 SUPER", "slug": "rtx-4080-super", "family": "Ada Lovelace", "vendor": "nvidia", "vastai_name": "RTX 4080 SUPER"}
 ```
 
-- `slug` — URL-safe lowercase identifier (used in file paths and CLI arguments)
-- `vastai_name` — the name Vast.ai uses in its search API
+- `slug` - URL-safe lowercase identifier (used in file paths and CLI arguments)
+- `vastai_name` - the name Vast.ai uses in its search API
 
 Run `just list-gpus` to verify Vast.ai has instances available for the new model.
 

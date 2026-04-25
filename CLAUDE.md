@@ -8,11 +8,11 @@ Hashcat GPU benchmark hub: automated infrastructure for renting GPU instances on
 
 ## Architecture
 
-- **Python CLI** (`src/hashcat_bench/`) — orchestrates Vast.ai GPU rentals, runs benchmarks, manages result data. Managed by `uv`.
-- **Docker container** (`container/`) — compiles hashcat from source at a pinned version, runs `hashcat -b --machine-readable`, outputs structured JSON.
-- **Svelte frontend** (`site/`) — single-page dashboard with filter bar, sortable table view, Chart.js comparison view, and CSV/JSON export. Built with Vite.
-- **GitHub Actions** (`.github/workflows/deploy.yml`) — builds the data index and deploys the Svelte site to GitHub Pages on push to main.
-- **Justfile** — command interface for everything.
+- **Python CLI** (`src/hashcat_bench/`) - orchestrates Vast.ai GPU rentals, runs benchmarks, manages result data. Managed by `uv`.
+- **Docker container** (`container/`) - compiles hashcat from source at a pinned version, runs `hashcat -b --machine-readable`, outputs structured JSON.
+- **Svelte frontend** (`site/`) - single-page dashboard with filter bar, sortable table view, Chart.js comparison view, and CSV/JSON export. Built with Vite.
+- **GitHub Actions** (`.github/workflows/deploy.yml`) - builds the data index and deploys the Svelte site to GitHub Pages on push to main.
+- **Justfile** - command interface for everything.
 
 ## Key Commands
 

@@ -1,87 +1,93 @@
-# Hashcat GPU Benchmarks
+<div align="center">
 
-Centralized, standardized [hashcat](https://github.com/hashcat/hashcat) GPU speed benchmarks with automated infrastructure and an interactive web dashboard.
+# ⚡ Hashcat GPU Benchmarks
 
-**Live site:** *Coming soon — deploy via GitHub Pages*
+**Apples-to-apples GPU speed benchmarks for [hashcat](https://github.com/hashcat/hashcat)**
 
-## Why This Exists
+[![Build](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/hashcat-benchmarks/deploy.yml?branch=main&style=flat-square&label=build)](https://github.com/YOUR_USERNAME/hashcat-benchmarks/actions)
+[![Python](https://img.shields.io/badge/python-3.12+-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Svelte](https://img.shields.io/badge/svelte-5-ff3e00?style=flat-square&logo=svelte&logoColor=white)](https://svelte.dev/)
+[![GPUs](https://img.shields.io/badge/GPUs-14-f59e0b?style=flat-square)]()
+[![Vast.ai](https://img.shields.io/badge/powered%20by-vast.ai-6366f1?style=flat-square)](https://vast.ai)
 
-Hashcat benchmark results are scattered across GitHub gists, forum posts, and random wikis. Each uses different hashcat versions, driver versions, and configurations, making meaningful GPU comparisons nearly impossible.
+[**Live Dashboard**](https://YOUR_USERNAME.github.io/hashcat-benchmarks) · [Development Guide](DEVELOPMENT.md) · [Request a GPU](https://github.com/YOUR_USERNAME/hashcat-benchmarks/issues/new)
 
-This project fixes that by:
+</div>
 
-- Running every benchmark in an **identical containerized environment** — same hashcat build, same CUDA toolkit, same OS — so the only variable is the GPU
-- Covering a **wide matrix of GPU models** across NVIDIA's RTX 30, 40, and 50 series
-- Publishing results to an **interactive dashboard** where you can filter by hashcat version, select GPUs, sort by hash mode, and compare speeds side-by-side
-- Providing **cost-aware tooling** that estimates Vast.ai rental costs before spending anything
+---
 
-## Dashboard Features
+## The problem
 
-- **Table View** — dense sortable table with all hash modes and selected GPUs as columns. Speeds formatted as GH/s, MH/s, etc. with raw values on hover.
-- **Compare View** — select a hash mode, see a bar chart comparing GPU speeds with relative performance ratios (e.g., "RTX 4090 is 2.0x faster than RTX 3080").
-- **Filters** — filter by hashcat version, toggle GPU models on/off, search hash modes by name or number.
-- **Export** — download filtered results as CSV or JSON.
+Hashcat benchmark results are all over the place - gists, forum threads, random wiki pages. Every one of them uses a different hashcat version, different drivers, different OS. Comparing GPU performance across these is a guessing game.
 
-## GPU Coverage
+This project runs every benchmark inside the same Docker container (same hashcat build, same CUDA toolkit, same OS) so the GPU is the only thing that changes. The results go to a filterable web dashboard where you can sort by hash mode, compare GPUs side by side, and export the data.
 
-Currently targeting mainstream NVIDIA consumer GPUs:
+## How it works
+
+```
+┌─── Your machine ──────────────────────────────────────────┐
+│  just bench rtx-4090 v6.2.6                               │
+│    → Search Vast.ai for cheapest RTX 4090                 │
+│    → Rent instance, run Docker container                  │
+│    → Collect JSON results, destroy instance                │
+│    → Save to data/results/v6.2.6/rtx-4090.json           │
+└───────────────────────────────────────────────────────────┘
+          │ git push
+          ▼
+┌─── GitHub Actions ────────────────────────────────────────┐
+│  Build index.json → Build Svelte site → Deploy to Pages   │
+└───────────────────────────────────────────────────────────┘
+```
+
+The orchestrator checks for existing results before renting anything. If a result already exists for that hashcat version + GPU + kernel mode, it skips it.
+
+## Quick start
+
+```bash
+just setup                        # install everything
+just list-gpus                    # check GPU availability and prices
+just estimate-matrix v6.2.6       # cost estimate (no money spent)
+just bench rtx-4090 v6.2.6        # run one benchmark
+just dev                          # preview the dashboard locally
+```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for the full setup walkthrough.
+
+## GPU coverage
 
 | Series | Models |
 |--------|--------|
-| RTX 50 (Blackwell) | 5090, 5080, 5070 Ti, 5070 |
-| RTX 40 (Ada Lovelace) | 4090, 4080, 4070 Ti, 4070, 4060 Ti, 4060 |
-| RTX 30 (Ampere) | 3090, 3080, 3070, 3060 |
+| **RTX 50** (Blackwell) | 5090, 5080, 5070 Ti, 5070 |
+| **RTX 40** (Ada Lovelace) | 4090, 4080, 4070 Ti, 4070, 4060 Ti, 4060 |
+| **RTX 30** (Ampere) | 3090, 3080, 3070, 3060 |
 
-RTX 10/20 series, AMD GPUs, and datacenter GPUs (A100, H100) may be added based on availability and cost.
+RTX 10/20 series, AMD, and datacenter GPUs (A100, H100) can be added if they are available on Vast.ai at a reasonable price. [Open an issue](https://github.com/YOUR_USERNAME/hashcat-benchmarks/issues/new) to request one.
 
-## How It Works
+## The dashboard
 
-1. A **Docker container** compiles hashcat at a pinned version on `nvidia/cuda:12.2.0-devel-ubuntu22.04`
-2. A **Python CLI** rents GPU instances on [Vast.ai](https://vast.ai), runs the container, and collects structured JSON results
-3. Results are stored in the repo as one JSON file per `(hashcat_version, gpu_model)` pair
-4. **GitHub Actions** builds a consolidated index and deploys the Svelte dashboard to GitHub Pages
+Two views, same filter bar.
 
-The orchestrator is **idempotent** — it skips any benchmark that already has results for the given hashcat version + GPU + kernel mode combination.
+**Table** - every hash mode as a row, selected GPUs as columns. Sortable. Speeds show as GH/s or MH/s with the raw number on hover. Works fine with 300+ hash modes.
 
-## Quick Start
+**Compare** - pick a hash mode, get a bar chart of GPU speeds. Tells you things like "RTX 4090 is 2.0x faster than RTX 3080" so you don't have to do the math.
 
-```bash
-# Install dependencies
-just setup
+You can filter by hashcat version, toggle GPUs on and off, search hash modes by name or number, and export whatever you are looking at as CSV or JSON.
 
-# See what GPUs are available on Vast.ai right now
-just list-gpus
+<details>
+<summary>Tech stack</summary>
+<br>
 
-# Estimate cost for a full benchmark run
-just estimate-matrix v6.2.6
+Python 3.12+ ([uv](https://docs.astral.sh/uv/)) · [Vast.ai](https://vast.ai) SDK · Docker on nvidia/cuda · Svelte 5 + Vite + Chart.js · [Just](https://github.com/casey/just) · GitHub Actions · GitHub Pages
 
-# Run a single benchmark
-just bench rtx-4090 v6.2.6
+</details>
 
-# Run the full matrix (sequential)
-just bench-matrix v6.2.6
+<details>
+<summary>Security</summary>
+<br>
 
-# Preview the dashboard locally
-just dev
-```
+All secrets live in environment variables, never in source. A [ripsecrets](https://github.com/sirwart/ripsecrets) pre-commit hook blocks commits that contain anything that looks like a key or token. `.env` files are gitignored - see `.env.example` for what you need to set.
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for full setup and development instructions.
-
-## Requesting New GPU Models
-
-Open an issue with the GPU model name. If it's available on Vast.ai at a reasonable cost, we'll add it to the matrix.
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| CLI / Orchestration | Python 3.12+, [uv](https://docs.astral.sh/uv/) |
-| Cloud GPU Rental | [Vast.ai](https://vast.ai) SDK |
-| Benchmark Container | Docker, nvidia/cuda base |
-| Frontend | Svelte 5, Vite, Chart.js |
-| Command Interface | [Just](https://github.com/casey/just) |
-| CI/CD | GitHub Actions |
-| Hosting | GitHub Pages |
+</details>
 
 ## License
 
