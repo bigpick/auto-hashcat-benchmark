@@ -23,6 +23,21 @@ lint *ARGS:
 
 # --- Discovery ---
 
+hashcat-versions:
+    {{ python }} hashcat-bench hashcat-versions
+
+hashcat-versions-all:
+    {{ python }} hashcat-bench hashcat-versions --all
+
+gpu-families:
+    {{ python }} hashcat-bench gpu-families
+
+add-gpu +NAMES:
+    {{ python }} hashcat-bench --data-dir {{ data_dir }} add-gpu {{ NAMES }}
+
+add-gpu-checked +NAMES:
+    {{ python }} hashcat-bench --data-dir {{ data_dir }} add-gpu --check {{ NAMES }}
+
 list-gpus *FILTER:
     {{ python }} hashcat-bench list-gpus {{ if FILTER != "" { "--filter " + FILTER } else { "" } }}
 
@@ -37,15 +52,17 @@ estimate-matrix HASHCAT:
 # --- Container ---
 
 registry := env("HASHCAT_BENCH_REGISTRY", "ghcr.io/YOUR_USERNAME/hashcat-bench")
+cuda_version := "12.9.1"
 
 build-image HASHCAT_VERSION:
     docker build \
         --build-arg HASHCAT_VERSION={{ HASHCAT_VERSION }} \
-        -t {{ registry }}:{{ HASHCAT_VERSION }}-cuda12.2 \
+        --build-arg CUDA_VERSION={{ cuda_version }} \
+        -t {{ registry }}:{{ HASHCAT_VERSION }}-cuda{{ cuda_version }} \
         container/
 
 push-image HASHCAT_VERSION:
-    docker push {{ registry }}:{{ HASHCAT_VERSION }}-cuda12.2
+    docker push {{ registry }}:{{ HASHCAT_VERSION }}-cuda{{ cuda_version }}
 
 # --- Benchmarking ---
 
