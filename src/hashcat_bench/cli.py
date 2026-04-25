@@ -28,25 +28,24 @@ def status_cmd(data_dir: Path, versions: list[str]) -> None:
             marker = "OK" if path.exists() else "MISSING"
             print(f"  {slug:20s} [{marker}]")
 
-def list_gpus_cmd(filter_str: str | None = None) -> None:
+def list_gpus_cmd(data_dir: Path, filter_str: str | None = None) -> None:
     from hashcat_bench.provider import VastProvider
-    provider = VastProvider()
-    gpu_names = [
-        "RTX 5090", "RTX 5080", "RTX 5070 Ti", "RTX 5070",
-        "RTX 4090", "RTX 4080", "RTX 4070 Ti", "RTX 4070", "RTX 4060 Ti", "RTX 4060",
-        "RTX 3090", "RTX 3080", "RTX 3070", "RTX 3060",
-    ]
+    gpu_file = data_dir / "gpu-models.json"
+    registry = GpuModelRegistry.load(gpu_file)
+    gpu_names = [m.vastai_name for m in registry.models]
     if filter_str:
         gpu_names = [g for g in gpu_names if filter_str.lower() in g.lower()]
-    print(f"{'GPU':20s} {'Available':>10s} {'$/hr':>10s}")
-    print("-" * 42)
+    provider = VastProvider()
+    print(f"{'GPU':30s}  {'Available':>9s}  {'$/hr':>8s}")
+    print("-" * 53)
     for name in gpu_names:
         offers = provider.search_gpu(name)
         if offers:
             cheapest = min(offers, key=lambda o: o["dph_total"])
-            print(f"{name:20s} {len(offers):>10d} ${cheapest['dph_total']:>9.3f}")
+            price = f"${cheapest['dph_total']:.3f}"
+            print(f"{name:30s}  {len(offers):>9d}  {price:>8s}")
         else:
-            print(f"{name:20s} {'none':>10s} {'n/a':>10s}")
+            print(f"{name:30s}  {'none':>9s}  {'n/a':>8s}")
 
 def estimate_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str) -> None:
     from hashcat_bench.estimator import CostEstimator
@@ -342,7 +341,7 @@ def main() -> None:
     elif args.command == "gpu-families":
         list_gpu_families_cmd()
     elif args.command == "list-gpus":
-        list_gpus_cmd(args.filter_str)
+        list_gpus_cmd(args.data_dir, args.filter_str)
     elif args.command == "estimate":
         estimate_cmd(args.data_dir, args.gpu, args.hashcat)
     elif args.command == "estimate-matrix":
