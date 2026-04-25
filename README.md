@@ -7,7 +7,7 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/bigpick/auto-hashcat-benchmark/deploy.yml?branch=main&style=flat-square&label=build)](https://github.com/bigpick/auto-hashcat-benchmark/actions)
 [![Python](https://img.shields.io/badge/python-3.12+-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Svelte](https://img.shields.io/badge/svelte-5-ff3e00?style=flat-square&logo=svelte&logoColor=white)](https://svelte.dev/)
-[![GPUs](https://img.shields.io/badge/GPUs-14-f59e0b?style=flat-square)]()
+[![GPUs](https://img.shields.io/badge/GPUs-101-f59e0b?style=flat-square)]()
 [![Vast.ai](https://img.shields.io/badge/powered%20by-vast.ai-6366f1?style=flat-square)](https://vast.ai)
 
 [**Live Dashboard**](https://bigpick.github.io/auto-hashcat-benchmark) · [Development Guide](DEVELOPMENT.md) · [Request a GPU](https://github.com/bigpick/auto-hashcat-benchmark/issues/new)
