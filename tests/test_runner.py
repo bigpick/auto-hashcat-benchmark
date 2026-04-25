@@ -6,7 +6,14 @@ from hashcat_bench.runner import BenchmarkRunner
 def _make_provider():
     provider = MagicMock()
     provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
-    provider.cheapest_offer.return_value = {"id": 100, "dph_total": 0.35}
+    provider.search_gpu.return_value = [
+        {
+            "id": 100, "dph_total": 0.35, "gpu_name": "RTX_4090",
+            "reliability": 0.95, "cpu_ram": 32768,
+            "cpu_cores_effective": 8, "cuda_max_good": 12.9,
+            "geolocation": "US",
+        },
+    ]
     provider.create_instance.return_value = 789
     provider.instance_status.side_effect = [
         {"actual_status": "loading"},
@@ -34,7 +41,7 @@ def test_run_calls_provider_lifecycle():
                 kernel_mode="optimized",
             )
     provider.ensure_ssh_key.assert_called_once()
-    provider.cheapest_offer.assert_called_once_with("RTX 4090", min_cuda=12.9)
+    provider.search_gpu.assert_called_once_with("RTX 4090")
     provider.create_instance.assert_called_once()
     provider.destroy_instance.assert_called_once_with(789)
     assert result.hashcat_version == "v6.2.6"
@@ -43,7 +50,7 @@ def test_run_calls_provider_lifecycle():
 def test_run_no_offers_raises():
     provider = MagicMock()
     provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
-    provider.cheapest_offer.return_value = None
+    provider.search_gpu.return_value = []
     runner = BenchmarkRunner(provider=provider)
     try:
         runner.run(vastai_name="RTX 9999", image="img", hashcat_version="v6.2.6", kernel_mode="optimized")
@@ -55,7 +62,13 @@ def test_run_no_offers_raises():
 def test_run_destroys_on_failure():
     provider = MagicMock()
     provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
-    provider.cheapest_offer.return_value = {"id": 100, "dph_total": 0.35}
+    provider.search_gpu.return_value = [
+        {
+            "id": 100, "dph_total": 0.35, "reliability": 0.95,
+            "cpu_ram": 32768, "cpu_cores_effective": 8,
+            "cuda_max_good": 12.9, "geolocation": "US",
+        },
+    ]
     provider.create_instance.return_value = 789
     provider.instance_status.side_effect = Exception("API error")
     runner = BenchmarkRunner(provider=provider)

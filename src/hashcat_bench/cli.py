@@ -199,7 +199,7 @@ def list_gpu_families_cmd() -> None:
     print(f"       just add-gpu <name>       e.g. just add-gpu 'RTX 2080 Ti'")
 
 
-def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: str = "optimized", benchmark_all: bool = False) -> None:
+def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: str = "optimized", benchmark_all: bool = False, interactive: bool = False) -> None:
     from hashcat_bench.provider import VastProvider
     from hashcat_bench.runner import BenchmarkRunner
     gpu_file = data_dir / "gpu-models.json"
@@ -228,7 +228,7 @@ def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: 
     result = runner.run(
         vastai_name=model.vastai_name, image=image,
         hashcat_version=hashcat_version, kernel_mode=kernel_mode,
-        benchmark_all=benchmark_all,
+        benchmark_all=benchmark_all, interactive=interactive,
     )
     path = dm.save_result(result)
     print(f"Result saved to {path}")
@@ -323,6 +323,7 @@ def main() -> None:
     p_bench.add_argument("--hashcat", required=True, help="Hashcat version")
     p_bench.add_argument("--kernel-mode", default="optimized", choices=["optimized", "default"])
     p_bench.add_argument("--benchmark-all", action="store_true", help="Use --benchmark-all (all hash modes including slow ones)")
+    p_bench.add_argument("-i", "--interactive", action="store_true", help="Interactively select from available offers")
     p_bm = sub.add_parser("bench-matrix", help="Run benchmarks for all GPUs")
     p_bm.add_argument("--hashcat", required=True, help="Hashcat version")
     p_bm.add_argument("--kernel-mode", default="optimized", choices=["optimized", "default"])
@@ -347,7 +348,7 @@ def main() -> None:
     elif args.command == "estimate-matrix":
         estimate_matrix_cmd(args.data_dir, args.hashcat)
     elif args.command == "bench":
-        bench_cmd(args.data_dir, args.gpu, args.hashcat, args.kernel_mode, args.benchmark_all)
+        bench_cmd(args.data_dir, args.gpu, args.hashcat, args.kernel_mode, args.benchmark_all, args.interactive)
     elif args.command == "bench-matrix":
         bench_matrix_cmd(args.data_dir, args.hashcat, args.kernel_mode, args.benchmark_all, args.budget_cap)
     elif args.command == "cleanup":

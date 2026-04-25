@@ -56,13 +56,16 @@ class BenchmarkRunner:
         kernel_mode: str = "optimized",
         benchmark_all: bool = False,
         cuda_version: str = "12.9.1",
+        interactive: bool = False,
     ) -> BenchmarkResult:
         key_path = _resolve_ssh_key_path()
         print(f"  Using SSH key: {key_path}")
         self._provider.ensure_ssh_key()
 
         cuda_major_minor = float(".".join(cuda_version.split(".")[:2]))
-        offer = self._provider.cheapest_offer(vastai_name, min_cuda=cuda_major_minor)
+        offer = self._select_offer(
+            vastai_name, cuda_major_minor, interactive,
+        )
         if offer is None:
             raise RuntimeError(
                 f"No available offers for GPU: {vastai_name} "
@@ -93,6 +96,54 @@ class BenchmarkRunner:
         finally:
             print(f"  Destroying instance {instance_id}...")
             self._provider.destroy_instance(instance_id)
+
+    def _select_offer(
+        self, vastai_name: str, min_cuda: float, interactive: bool
+    ) -> dict | None:
+        offers = self._provider.search_gpu(vastai_name)
+        viable = [
+            o for o in offers
+            if o.get("reliability", 0) >= 0.8
+            and o.get("cpu_ram", 0) >= 16384
+            and o.get("cpu_cores_effective", 0) >= 4
+            and o.get("cuda_max_good", 0) >= min_cuda
+        ]
+
+        if not viable:
+            if offers:
+                print(f"  Found {len(offers)} offers but none meet requirements (CUDA >= {min_cuda}, RAM >= 16GB, reliability >= 0.8)")
+            return None
+
+        viable.sort(key=lambda o: o["dph_total"])
+
+        def _fmt(o: dict, idx: str = "") -> str:
+            prefix = f"  [{idx}] " if idx else "  "
+            return (
+                f"{prefix}ID {o.get('id', '?'):>9}  "
+                f"${o['dph_total']:.3f}/hr  "
+                f"CUDA {o.get('cuda_max_good', '?')}  "
+                f"RAM {int(o.get('cpu_ram', 0) / 1024)}GB  "
+                f"{o.get('cpu_cores_effective', '?')} cores  "
+                f"reliability {o.get('reliability', 0):.0%}  "
+                f"{o.get('geolocation', '?')}"
+            )
+
+        if interactive and len(viable) > 1:
+            print(f"  {len(viable)} viable offers for {vastai_name}:\n")
+            for i, o in enumerate(viable[:10]):
+                print(_fmt(o, str(i + 1)))
+            print()
+            choice = input(f"  Pick [1-{min(len(viable), 10)}] or Enter for cheapest: ").strip()
+            if choice.isdigit() and 1 <= int(choice) <= min(len(viable), 10):
+                selected = viable[int(choice) - 1]
+            else:
+                selected = viable[0]
+        else:
+            selected = viable[0]
+            print(f"  Selected ({len(viable)} viable):")
+            print(_fmt(selected))
+
+        return selected
 
     def _wait_for_ready(self, instance_id: int) -> dict:
         start = time.time()
