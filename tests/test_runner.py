@@ -34,7 +34,7 @@ def test_run_calls_provider_lifecycle():
                 kernel_mode="optimized",
             )
     provider.ensure_ssh_key.assert_called_once()
-    provider.cheapest_offer.assert_called_once_with("RTX 4090")
+    provider.cheapest_offer.assert_called_once_with("RTX 4090", min_cuda=12.9)
     provider.create_instance.assert_called_once()
     provider.destroy_instance.assert_called_once_with(789)
     assert result.hashcat_version == "v6.2.6"

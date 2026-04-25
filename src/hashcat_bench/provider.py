@@ -49,6 +49,7 @@ class VastProvider:
         min_reliability: float = 0.8,
         min_ram_mb: int = 16384,
         min_cpu_cores: int = 4,
+        min_cuda: float = 0.0,
     ) -> dict | None:
         offers = self.search_gpu(vastai_name)
         viable = [
@@ -56,6 +57,7 @@ class VastProvider:
             if o.get("reliability", 0) >= min_reliability
             and o.get("cpu_ram", 0) >= min_ram_mb
             and o.get("cpu_cores_effective", 0) >= min_cpu_cores
+            and o.get("cuda_max_good", 0) >= min_cuda
         ]
         if not viable:
             return None

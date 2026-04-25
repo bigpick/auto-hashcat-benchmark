@@ -61,9 +61,13 @@ class BenchmarkRunner:
         print(f"  Using SSH key: {key_path}")
         self._provider.ensure_ssh_key()
 
-        offer = self._provider.cheapest_offer(vastai_name)
+        cuda_major_minor = float(".".join(cuda_version.split(".")[:2]))
+        offer = self._provider.cheapest_offer(vastai_name, min_cuda=cuda_major_minor)
         if offer is None:
-            raise RuntimeError(f"No available offers for GPU: {vastai_name}")
+            raise RuntimeError(
+                f"No available offers for GPU: {vastai_name} "
+                f"(with CUDA >= {cuda_major_minor})"
+            )
 
         env = {
             "HASHCAT_VERSION": hashcat_version,
