@@ -29,8 +29,8 @@ This project runs every benchmark inside the same Docker container (same hashcat
 │  just bench rtx-4090 v6.2.6                               │
 │    → Search Vast.ai for cheapest RTX 4090                 │
 │    → Rent instance, run Docker container                  │
-│    → Collect JSON results, destroy instance                │
-│    → Save to data/results/v6.2.6/rtx-4090.json           │
+│    → Collect JSON results, destroy instance               │
+│    → Save to data/results/v6.2.6/rtx-4090.json            │
 └───────────────────────────────────────────────────────────┘
           │ git push
           ▼
