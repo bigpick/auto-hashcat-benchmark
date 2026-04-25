@@ -29,11 +29,39 @@
       "vastai_name": "RTX 5070"
     },
     {
+      "name": "RTX 5060 Ti",
+      "slug": "rtx-5060-ti",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 5060 Ti"
+    },
+    {
+      "name": "RTX 5060",
+      "slug": "rtx-5060",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 5060"
+    },
+    {
+      "name": "RTX 4090 D",
+      "slug": "rtx-4090-d",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4090 D"
+    },
+    {
       "name": "RTX 4090",
       "slug": "rtx-4090",
       "family": "Ada Lovelace",
       "vendor": "nvidia",
       "vastai_name": "RTX 4090"
+    },
+    {
+      "name": "RTX 4080 Super",
+      "slug": "rtx-4080-super",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4080 Super"
     },
     {
       "name": "RTX 4080",
@@ -43,11 +71,25 @@
       "vastai_name": "RTX 4080"
     },
     {
+      "name": "RTX 4070 Ti Super",
+      "slug": "rtx-4070-ti-super",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4070 Ti Super"
+    },
+    {
       "name": "RTX 4070 Ti",
       "slug": "rtx-4070-ti",
       "family": "Ada Lovelace",
       "vendor": "nvidia",
       "vastai_name": "RTX 4070 Ti"
+    },
+    {
+      "name": "RTX 4070 Super",
+      "slug": "rtx-4070-super",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4070 Super"
     },
     {
       "name": "RTX 4070",
@@ -71,11 +113,25 @@
       "vastai_name": "RTX 4060"
     },
     {
+      "name": "RTX 3090 Ti",
+      "slug": "rtx-3090-ti",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 3090 Ti"
+    },
+    {
       "name": "RTX 3090",
       "slug": "rtx-3090",
       "family": "Ampere",
       "vendor": "nvidia",
       "vastai_name": "RTX 3090"
+    },
+    {
+      "name": "RTX 3080 Ti",
+      "slug": "rtx-3080-ti",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 3080 Ti"
     },
     {
       "name": "RTX 3080",
@@ -85,11 +141,25 @@
       "vastai_name": "RTX 3080"
     },
     {
+      "name": "RTX 3070 Ti",
+      "slug": "rtx-3070-ti",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 3070 Ti"
+    },
+    {
       "name": "RTX 3070",
       "slug": "rtx-3070",
       "family": "Ampere",
       "vendor": "nvidia",
       "vastai_name": "RTX 3070"
+    },
+    {
+      "name": "RTX 3060 Ti",
+      "slug": "rtx-3060-ti",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 3060 Ti"
     },
     {
       "name": "RTX 3060",
@@ -99,6 +169,13 @@
       "vastai_name": "RTX 3060"
     },
     {
+      "name": "RTX 3050",
+      "slug": "rtx-3050",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 3050"
+    },
+    {
       "name": "RTX 2080 Ti",
       "slug": "rtx-2080-ti",
       "family": "Turing",
@@ -106,11 +183,11 @@
       "vastai_name": "RTX 2080 Ti"
     },
     {
-      "name": "RTX 2080 SUPER",
+      "name": "RTX 2080 Super",
       "slug": "rtx-2080-super",
       "family": "Turing",
       "vendor": "nvidia",
-      "vastai_name": "RTX 2080 SUPER"
+      "vastai_name": "RTX 2080 Super"
     },
     {
       "name": "RTX 2080",
@@ -120,11 +197,11 @@
       "vastai_name": "RTX 2080"
     },
     {
-      "name": "RTX 2070 SUPER",
+      "name": "RTX 2070 Super",
       "slug": "rtx-2070-super",
       "family": "Turing",
       "vendor": "nvidia",
-      "vastai_name": "RTX 2070 SUPER"
+      "vastai_name": "RTX 2070 Super"
     },
     {
       "name": "RTX 2070",
@@ -134,11 +211,11 @@
       "vastai_name": "RTX 2070"
     },
     {
-      "name": "RTX 2060 SUPER",
+      "name": "RTX 2060 Super",
       "slug": "rtx-2060-super",
       "family": "Turing",
       "vendor": "nvidia",
-      "vastai_name": "RTX 2060 SUPER"
+      "vastai_name": "RTX 2060 Super"
     },
     {
       "name": "RTX 2060",
@@ -148,11 +225,487 @@
       "vastai_name": "RTX 2060"
     },
     {
-      "name": "rtx-10",
-      "slug": "rtx-10",
-      "family": "Unknown",
+      "name": "A800 PCIe",
+      "slug": "a800-pcie",
+      "family": "Ampere",
       "vendor": "nvidia",
-      "vastai_name": "rtx-10"
+      "vastai_name": "A800 PCIe"
+    },
+    {
+      "name": "A100 PCIe",
+      "slug": "a100-pcie",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A100 PCIe"
+    },
+    {
+      "name": "A100 SXM4",
+      "slug": "a100-sxm4",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A100 SXM4"
+    },
+    {
+      "name": "A100 SXM",
+      "slug": "a100-sxm",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A100 SXM"
+    },
+    {
+      "name": "A100X",
+      "slug": "a100x",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A100X"
+    },
+    {
+      "name": "H200 NVL",
+      "slug": "h200-nvl",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "H200 NVL"
+    },
+    {
+      "name": "H200 SXM",
+      "slug": "h200-sxm",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "H200 SXM"
+    },
+    {
+      "name": "H100 NVL",
+      "slug": "h100-nvl",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "H100 NVL"
+    },
+    {
+      "name": "H100 PCIe",
+      "slug": "h100-pcie",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "H100 PCIe"
+    },
+    {
+      "name": "H100 SXM",
+      "slug": "h100-sxm",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "H100 SXM"
+    },
+    {
+      "name": "GH200 SXM",
+      "slug": "gh200-sxm",
+      "family": "Hopper",
+      "vendor": "nvidia",
+      "vastai_name": "GH200 SXM"
+    },
+    {
+      "name": "B200",
+      "slug": "b200",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "B200"
+    },
+    {
+      "name": "RTX 6000 Ada Generation",
+      "slug": "rtx-6000-ada-generation",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 6000 Ada Generation"
+    },
+    {
+      "name": "RTX 5880 Ada Generation",
+      "slug": "rtx-5880-ada-generation",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 5880 Ada Generation"
+    },
+    {
+      "name": "RTX 5000 Ada Generation",
+      "slug": "rtx-5000-ada-generation",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 5000 Ada Generation"
+    },
+    {
+      "name": "RTX 4500 Ada Generation",
+      "slug": "rtx-4500-ada-generation",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4500 Ada Generation"
+    },
+    {
+      "name": "RTX 4000 Ada Generation",
+      "slug": "rtx-4000-ada-generation",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4000 Ada Generation"
+    },
+    {
+      "name": "L40S",
+      "slug": "l40s",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "L40S"
+    },
+    {
+      "name": "L40",
+      "slug": "l40",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "L40"
+    },
+    {
+      "name": "L4",
+      "slug": "l4",
+      "family": "Ada Lovelace",
+      "vendor": "nvidia",
+      "vastai_name": "L4"
+    },
+    {
+      "name": "Titan RTX",
+      "slug": "titan-rtx",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "Titan RTX"
+    },
+    {
+      "name": "Titan V",
+      "slug": "titan-v",
+      "family": "Volta",
+      "vendor": "nvidia",
+      "vastai_name": "Titan V"
+    },
+    {
+      "name": "Titan X",
+      "slug": "titan-x",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "Titan X"
+    },
+    {
+      "name": "Titan Xp",
+      "slug": "titan-xp",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "Titan Xp"
+    },
+    {
+      "name": "GTX 1660 Ti",
+      "slug": "gtx-1660-ti",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1660 Ti"
+    },
+    {
+      "name": "GTX 1660 Super",
+      "slug": "gtx-1660-super",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1660 Super"
+    },
+    {
+      "name": "GTX 1660",
+      "slug": "gtx-1660",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1660"
+    },
+    {
+      "name": "GTX 1650 Ti",
+      "slug": "gtx-1650-ti",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1650 Ti"
+    },
+    {
+      "name": "GTX 1650 Super",
+      "slug": "gtx-1650-super",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1650 Super"
+    },
+    {
+      "name": "GTX 1650",
+      "slug": "gtx-1650",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1650"
+    },
+    {
+      "name": "GTX 1080 Ti",
+      "slug": "gtx-1080-ti",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1080 Ti"
+    },
+    {
+      "name": "GTX 1080",
+      "slug": "gtx-1080",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1080"
+    },
+    {
+      "name": "GTX 1070 Ti",
+      "slug": "gtx-1070-ti",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1070 Ti"
+    },
+    {
+      "name": "GTX 1070",
+      "slug": "gtx-1070",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1070"
+    },
+    {
+      "name": "GTX 1060",
+      "slug": "gtx-1060",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1060"
+    },
+    {
+      "name": "GTX 1050 Ti",
+      "slug": "gtx-1050-ti",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1050 Ti"
+    },
+    {
+      "name": "GTX 1050",
+      "slug": "gtx-1050",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 1050"
+    },
+    {
+      "name": "GTX 980 Ti",
+      "slug": "gtx-980-ti",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 980 Ti"
+    },
+    {
+      "name": "GTX 980",
+      "slug": "gtx-980",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 980"
+    },
+    {
+      "name": "GTX 970",
+      "slug": "gtx-970",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 970"
+    },
+    {
+      "name": "GTX 960",
+      "slug": "gtx-960",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 960"
+    },
+    {
+      "name": "GTX 750 Ti",
+      "slug": "gtx-750-ti",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 750 Ti"
+    },
+    {
+      "name": "GTX 750",
+      "slug": "gtx-750",
+      "family": "Maxwell",
+      "vendor": "nvidia",
+      "vastai_name": "GTX 750"
+    },
+    {
+      "name": "RTX PRO 6000 Blackwell Workstation",
+      "slug": "rtx-pro-6000-blackwell-workstation",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX PRO 6000 Blackwell Workstation"
+    },
+    {
+      "name": "RTX PRO 6000 Blackwell Server",
+      "slug": "rtx-pro-6000-blackwell-server",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX PRO 6000 Blackwell Server"
+    },
+    {
+      "name": "RTX PRO 5000 Blackwell",
+      "slug": "rtx-pro-5000-blackwell",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX PRO 5000 Blackwell"
+    },
+    {
+      "name": "RTX PRO 4500 Blackwell",
+      "slug": "rtx-pro-4500-blackwell",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX PRO 4500 Blackwell"
+    },
+    {
+      "name": "RTX PRO 4000 Blackwell",
+      "slug": "rtx-pro-4000-blackwell",
+      "family": "Blackwell",
+      "vendor": "nvidia",
+      "vastai_name": "RTX PRO 4000 Blackwell"
+    },
+    {
+      "name": "RTX A6000",
+      "slug": "rtx-a6000",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX A6000"
+    },
+    {
+      "name": "RTX A5000",
+      "slug": "rtx-a5000",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX A5000"
+    },
+    {
+      "name": "RTX A4500",
+      "slug": "rtx-a4500",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX A4500"
+    },
+    {
+      "name": "RTX A4000",
+      "slug": "rtx-a4000",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX A4000"
+    },
+    {
+      "name": "RTX A2000",
+      "slug": "rtx-a2000",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "RTX A2000"
+    },
+    {
+      "name": "A40",
+      "slug": "a40",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A40"
+    },
+    {
+      "name": "A30",
+      "slug": "a30",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A30"
+    },
+    {
+      "name": "A16",
+      "slug": "a16",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A16"
+    },
+    {
+      "name": "A10G",
+      "slug": "a10g",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A10G"
+    },
+    {
+      "name": "A10",
+      "slug": "a10",
+      "family": "Ampere",
+      "vendor": "nvidia",
+      "vastai_name": "A10"
+    },
+    {
+      "name": "RTX 8000",
+      "slug": "rtx-8000",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 8000"
+    },
+    {
+      "name": "RTX 6000",
+      "slug": "rtx-6000",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 6000"
+    },
+    {
+      "name": "RTX 5000",
+      "slug": "rtx-5000",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 5000"
+    },
+    {
+      "name": "RTX 4000",
+      "slug": "rtx-4000",
+      "family": "Turing",
+      "vendor": "nvidia",
+      "vastai_name": "RTX 4000"
+    },
+    {
+      "name": "GP100",
+      "slug": "gp100",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "GP100"
+    },
+    {
+      "name": "P6000",
+      "slug": "p6000",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P6000"
+    },
+    {
+      "name": "P5000",
+      "slug": "p5000",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P5000"
+    },
+    {
+      "name": "P4000",
+      "slug": "p4000",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P4000"
+    },
+    {
+      "name": "P2000",
+      "slug": "p2000",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P2000"
+    },
+    {
+      "name": "P106-100",
+      "slug": "p106-100",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P106-100"
+    },
+    {
+      "name": "P104-100",
+      "slug": "p104-100",
+      "family": "Pascal",
+      "vendor": "nvidia",
+      "vastai_name": "P104-100"
     }
   ]
 }

@@ -32,9 +32,20 @@ class VastProvider:
             return []
         return offers
 
-    def cheapest_offer(self, vastai_name: str, min_reliability: float = 0.8) -> dict | None:
+    def cheapest_offer(
+        self,
+        vastai_name: str,
+        min_reliability: float = 0.8,
+        min_ram_mb: int = 16384,
+        min_cpu_cores: int = 4,
+    ) -> dict | None:
         offers = self.search_gpu(vastai_name)
-        viable = [o for o in offers if o.get("reliability", 0) >= min_reliability]
+        viable = [
+            o for o in offers
+            if o.get("reliability", 0) >= min_reliability
+            and o.get("cpu_ram", 0) >= min_ram_mb
+            and o.get("cpu_cores_effective", 0) >= min_cpu_cores
+        ]
         if not viable:
             return None
         return min(viable, key=lambda o: o["dph_total"])

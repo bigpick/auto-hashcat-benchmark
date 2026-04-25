@@ -28,8 +28,8 @@ def test_search_offers_filters_by_name():
 def test_cheapest_offer():
     mock_sdk = _mock_vast()
     mock_sdk.search_offers.return_value = [
-        {"id": 456, "gpu_name": "RTX_4090", "dph_total": 0.50, "num_gpus": 1, "reliability": 0.95, "cuda_max_good": 12.2},
-        {"id": 123, "gpu_name": "RTX_4090", "dph_total": 0.30, "num_gpus": 1, "reliability": 0.95, "cuda_max_good": 12.2},
+        {"id": 456, "gpu_name": "RTX_4090", "dph_total": 0.50, "num_gpus": 1, "reliability": 0.95, "cuda_max_good": 12.2, "cpu_ram": 32768, "cpu_cores_effective": 8},
+        {"id": 123, "gpu_name": "RTX_4090", "dph_total": 0.30, "num_gpus": 1, "reliability": 0.95, "cuda_max_good": 12.2, "cpu_ram": 32768, "cpu_cores_effective": 8},
     ]
     provider = VastProvider(sdk=mock_sdk)
     offer = provider.cheapest_offer("RTX 4090")

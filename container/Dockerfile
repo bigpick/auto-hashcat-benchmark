@@ -13,9 +13,8 @@ WORKDIR /root/
 # which are only needed for Rust bridge plugin development, not benchmarking)
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y \
-        curl wget unzip tar p7zip-full \
-        libjudy-dev libpcre3-dev libmhash-dev \
         git make build-essential \
+        libjudy-dev libpcre3-dev libmhash-dev \
         jq bc \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -24,28 +23,13 @@ RUN removeopencl=$(dpkg --list | awk '/opencl/ && $2 ~ /^cuda-opencl-/ {print $2
     if [ -n "$removeopencl" ]; then apt-get remove -y $removeopencl; fi && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install hashcat: use pre-built release for tagged versions, build from source otherwise.
-# Only versions matching vX.Y.Z or X.Y.Z get the download path.
-# Anything else (branch names, commit SHAs) builds from source.
-RUN CLEAN_VERSION=$(echo "${HASHCAT_VERSION}" | sed 's/^v//') && \
-    if echo "$CLEAN_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then \
-        echo "Downloading pre-built hashcat ${CLEAN_VERSION}..." && \
-        curl -fSL "https://hashcat.net/files/hashcat-${CLEAN_VERSION}.7z" -o hashcat.7z && \
-        7z x hashcat.7z && \
-        mv hashcat-${CLEAN_VERSION} /root/hashcat && \
-        rm hashcat.7z; \
-    else \
-        echo "Building hashcat from source (ref: ${HASHCAT_VERSION})..." && \
-        git clone https://github.com/hashcat/hashcat.git /root/hashcat-src && \
-        cd /root/hashcat-src && \
-        git checkout ${HASHCAT_VERSION} && \
-        git submodule update --init && \
-        make -j$(nproc) && \
-        make install && \
-        mkdir -p /root/hashcat && \
-        cp -r /root/hashcat-src/* /root/hashcat/ && \
-        rm -rf /root/hashcat-src; \
-    fi
+# Build hashcat from source. Accepts any git ref: tag, branch, or commit SHA.
+RUN git clone https://github.com/hashcat/hashcat.git /root/hashcat && \
+    cd /root/hashcat && \
+    git checkout ${HASHCAT_VERSION} && \
+    git submodule update --init && \
+    make -j$(nproc) && \
+    make install
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

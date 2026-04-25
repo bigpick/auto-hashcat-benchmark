@@ -117,68 +117,7 @@ def hashcat_versions_cmd(show_all: bool = False) -> None:
         print("Tip: pass any git ref to build-image (tag, branch, or commit SHA)")
 
 
-GPU_FAMILIES: dict[str, list[dict]] = {
-    "rtx-50": [
-        {"name": "RTX 5090", "family": "Blackwell"},
-        {"name": "RTX 5080", "family": "Blackwell"},
-        {"name": "RTX 5070 Ti", "family": "Blackwell"},
-        {"name": "RTX 5070", "family": "Blackwell"},
-    ],
-    "rtx-40": [
-        {"name": "RTX 4090", "family": "Ada Lovelace"},
-        {"name": "RTX 4080 SUPER", "family": "Ada Lovelace"},
-        {"name": "RTX 4080", "family": "Ada Lovelace"},
-        {"name": "RTX 4070 Ti SUPER", "family": "Ada Lovelace"},
-        {"name": "RTX 4070 Ti", "family": "Ada Lovelace"},
-        {"name": "RTX 4070 SUPER", "family": "Ada Lovelace"},
-        {"name": "RTX 4070", "family": "Ada Lovelace"},
-        {"name": "RTX 4060 Ti", "family": "Ada Lovelace"},
-        {"name": "RTX 4060", "family": "Ada Lovelace"},
-    ],
-    "rtx-30": [
-        {"name": "RTX 3090 Ti", "family": "Ampere"},
-        {"name": "RTX 3090", "family": "Ampere"},
-        {"name": "RTX 3080 Ti", "family": "Ampere"},
-        {"name": "RTX 3080", "family": "Ampere"},
-        {"name": "RTX 3070 Ti", "family": "Ampere"},
-        {"name": "RTX 3070", "family": "Ampere"},
-        {"name": "RTX 3060 Ti", "family": "Ampere"},
-        {"name": "RTX 3060", "family": "Ampere"},
-    ],
-    "rtx-20": [
-        {"name": "RTX 2080 Ti", "family": "Turing"},
-        {"name": "RTX 2080 SUPER", "family": "Turing"},
-        {"name": "RTX 2080", "family": "Turing"},
-        {"name": "RTX 2070 SUPER", "family": "Turing"},
-        {"name": "RTX 2070", "family": "Turing"},
-        {"name": "RTX 2060 SUPER", "family": "Turing"},
-        {"name": "RTX 2060", "family": "Turing"},
-    ],
-    "gtx-16": [
-        {"name": "GTX 1660 Ti", "family": "Turing"},
-        {"name": "GTX 1660 SUPER", "family": "Turing"},
-        {"name": "GTX 1660", "family": "Turing"},
-        {"name": "GTX 1650 SUPER", "family": "Turing"},
-        {"name": "GTX 1650", "family": "Turing"},
-    ],
-    "gtx-10": [
-        {"name": "GTX 1080 Ti", "family": "Pascal"},
-        {"name": "GTX 1080", "family": "Pascal"},
-        {"name": "GTX 1070 Ti", "family": "Pascal"},
-        {"name": "GTX 1070", "family": "Pascal"},
-        {"name": "GTX 1060", "family": "Pascal"},
-    ],
-    "datacenter": [
-        {"name": "H100", "family": "Hopper"},
-        {"name": "A100", "family": "Ampere"},
-        {"name": "A10", "family": "Ampere"},
-        {"name": "L4", "family": "Ada Lovelace"},
-        {"name": "L40", "family": "Ada Lovelace"},
-        {"name": "L40S", "family": "Ada Lovelace"},
-        {"name": "T4", "family": "Turing"},
-        {"name": "V100", "family": "Volta"},
-    ],
-}
+from hashcat_bench.gpu_catalog import GPU_FAMILIES
 
 import re as _re
 
@@ -196,9 +135,18 @@ def add_gpu_cmd(data_dir: Path, names: list[str], family: str | None = None, che
     to_add: list[dict] = []
 
     for name in names:
-        if name in GPU_FAMILIES:
+        if name == "all":
+            for fam in GPU_FAMILIES.values():
+                to_add.extend(fam)
+        elif name in GPU_FAMILIES:
             to_add.extend(GPU_FAMILIES[name])
+        elif name.lower().replace(" ", "-") in GPU_FAMILIES:
+            to_add.extend(GPU_FAMILIES[name.lower().replace(" ", "-")])
         else:
+            if not family:
+                print(f"  WARNING: '{name}' is not a known family key. Use --family to specify the architecture.")
+                print(f"           Known families: {', '.join(GPU_FAMILIES.keys())}")
+                print(f"           Adding anyway with family 'Unknown'.\n")
             to_add.append({"name": name, "family": family or "Unknown"})
 
     added = 0

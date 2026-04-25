@@ -15,6 +15,16 @@ class BenchmarkEntry:
 
 
 @dataclass
+class HostInfo:
+    gpu_vram_mib: int = 0
+    cpu_model: str = ""
+    cpu_cores: int = 0
+    ram_total_mb: int = 0
+    pcie_gen: str = ""
+    pcie_width: str = ""
+
+
+@dataclass
 class BenchmarkResult:
     hashcat_version: str
     gpu_model: str
@@ -24,6 +34,7 @@ class BenchmarkResult:
     kernel_mode: str
     benchmark_date: str
     benchmarks: list[BenchmarkEntry] = field(default_factory=list)
+    host: HostInfo = field(default_factory=HostInfo)
 
     @property
     def file_slug(self) -> str:
@@ -38,6 +49,8 @@ class BenchmarkResult:
     @classmethod
     def from_dict(cls, d: dict) -> BenchmarkResult:
         benchmarks = [BenchmarkEntry(**b) for b in d.get("benchmarks", [])]
+        host_data = d.get("host", {})
+        host = HostInfo(**host_data) if host_data else HostInfo()
         return cls(
             hashcat_version=d["hashcat_version"],
             gpu_model=d["gpu_model"],
@@ -47,6 +60,7 @@ class BenchmarkResult:
             kernel_mode=d["kernel_mode"],
             benchmark_date=d["benchmark_date"],
             benchmarks=benchmarks,
+            host=host,
         )
 
 

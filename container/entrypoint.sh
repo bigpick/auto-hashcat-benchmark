@@ -16,10 +16,21 @@ else
     exit 1
 fi
 
-gpu_info=$(nvidia-smi --query-gpu=name,driver_version --format=csv,noheader)
+# GPU info
+gpu_info=$(nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader)
 gpu_name=$(echo "$gpu_info" | cut -d',' -f1 | xargs)
 driver_version=$(echo "$gpu_info" | cut -d',' -f2 | xargs)
+gpu_vram_mib=$(echo "$gpu_info" | cut -d',' -f3 | sed 's/[^0-9]//g')
 
+# Host hardware info
+cpu_model=$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | cut -d: -f2 | xargs || echo "unknown")
+cpu_cores=$(nproc 2>/dev/null || echo "0")
+ram_total_mb=$(grep MemTotal /proc/meminfo 2>/dev/null | awk '{print int($2/1024)}' || echo "0")
+pcie_info=$(nvidia-smi --query-gpu=pcie.link.gen.current,pcie.link.width.current --format=csv,noheader 2>/dev/null || echo "unknown,unknown")
+pcie_gen=$(echo "$pcie_info" | cut -d',' -f1 | xargs)
+pcie_width=$(echo "$pcie_info" | cut -d',' -f2 | xargs)
+
+# Run benchmark
 hashcat_flags="-b --machine-readable"
 if [ "$KERNEL_MODE" = "optimized" ]; then
     hashcat_flags="$hashcat_flags -O"
@@ -44,6 +55,12 @@ jq -n \
     --arg km "$KERNEL_MODE" \
     --arg bd "$benchmark_date" \
     --argjson bm "$benchmarks_json" \
+    --arg gpu_vram_mib "$gpu_vram_mib" \
+    --arg cpu_model "$cpu_model" \
+    --arg cpu_cores "$cpu_cores" \
+    --arg ram_total_mb "$ram_total_mb" \
+    --arg pcie_gen "$pcie_gen" \
+    --arg pcie_width "$pcie_width" \
     '{
         hashcat_version: $hv,
         gpu_model: $gm,
@@ -52,5 +69,13 @@ jq -n \
         cuda_version: $cv,
         kernel_mode: $km,
         benchmark_date: $bd,
+        host: {
+            gpu_vram_mib: ($gpu_vram_mib | tonumber),
+            cpu_model: $cpu_model,
+            cpu_cores: ($cpu_cores | tonumber),
+            ram_total_mb: ($ram_total_mb | tonumber),
+            pcie_gen: $pcie_gen,
+            pcie_width: $pcie_width
+        },
         benchmarks: $bm
     }' | tee /tmp/result.json

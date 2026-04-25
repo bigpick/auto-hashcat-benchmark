@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from hashcat_bench.cli import add_gpu_cmd, list_gpu_families_cmd, GPU_FAMILIES
+from hashcat_bench.cli import add_gpu_cmd, list_gpu_families_cmd
+from hashcat_bench.gpu_catalog import GPU_FAMILIES
 
 
 def _make_gpu_file(tmp_path, models=None):
@@ -39,19 +40,18 @@ def test_add_skips_duplicates(tmp_path):
     assert slugs.count("rtx-2080-ti") == 1
 
 
-def test_add_datacenter(tmp_path):
+def test_add_h_series(tmp_path):
     _make_gpu_file(tmp_path)
-    add_gpu_cmd(tmp_path, ["datacenter"])
+    add_gpu_cmd(tmp_path, ["h-series"])
     data = json.loads((tmp_path / "gpu-models.json").read_text())
     names = [m["name"] for m in data["models"]]
-    assert "H100" in names
-    assert "A100" in names
-    assert "T4" in names
+    assert "H100 PCIe" in names
+    assert "H100 SXM" in names
 
 
 def test_gpu_families_lists_all(capsys):
     list_gpu_families_cmd()
     out = capsys.readouterr().out
     assert "rtx-20" in out
-    assert "datacenter" in out
+    assert "h-series" in out
     assert "gtx-10" in out
