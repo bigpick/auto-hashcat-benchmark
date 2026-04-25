@@ -200,7 +200,7 @@ def list_gpu_families_cmd() -> None:
     print(f"       just add-gpu <name>       e.g. just add-gpu 'RTX 2080 Ti'")
 
 
-def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: str = "optimized") -> None:
+def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: str = "optimized", benchmark_all: bool = False) -> None:
     from hashcat_bench.provider import VastProvider
     from hashcat_bench.runner import BenchmarkRunner
     gpu_file = data_dir / "gpu-models.json"
@@ -210,21 +210,31 @@ def bench_cmd(data_dir: Path, gpu_slug: str, hashcat_version: str, kernel_mode: 
         print(f"Error: unknown GPU slug '{gpu_slug}'", file=sys.stderr)
         sys.exit(1)
     dm = DataManager(data_dir)
-    file_slug = gpu_slug if kernel_mode == "optimized" else f"{gpu_slug}-default"
+    scope = "all" if benchmark_all else "standard"
+    file_slug = gpu_slug
+    if kernel_mode == "default":
+        file_slug += "-default"
+    if benchmark_all:
+        file_slug += "-all"
     if dm.result_exists(hashcat_version, file_slug, kernel_mode):
-        print(f"Already benchmarked: {model.name} @ {hashcat_version} ({kernel_mode})")
+        print(f"Already benchmarked: {model.name} @ {hashcat_version} ({kernel_mode}, {scope})")
         return
     container_registry = os.environ.get("HASHCAT_BENCH_REGISTRY", "ghcr.io/YOUR_USERNAME/hashcat-bench")
     cuda_ver = os.environ.get("HASHCAT_BENCH_CUDA", "12.9.1")
     image = f"{container_registry}:{hashcat_version}-cuda{cuda_ver}"
     provider = VastProvider()
     runner = BenchmarkRunner(provider=provider)
-    print(f"Benchmarking {model.name} @ {hashcat_version} ({kernel_mode})...")
-    result = runner.run(vastai_name=model.vastai_name, image=image, hashcat_version=hashcat_version, kernel_mode=kernel_mode)
+    scope_label = "benchmark-all" if benchmark_all else "benchmark"
+    print(f"Running {scope_label}: {model.name} @ {hashcat_version} ({kernel_mode})...")
+    result = runner.run(
+        vastai_name=model.vastai_name, image=image,
+        hashcat_version=hashcat_version, kernel_mode=kernel_mode,
+        benchmark_all=benchmark_all,
+    )
     path = dm.save_result(result)
     print(f"Result saved to {path}")
 
-def bench_matrix_cmd(data_dir: Path, hashcat_version: str, kernel_mode: str = "optimized", budget_cap: float | None = None) -> None:
+def bench_matrix_cmd(data_dir: Path, hashcat_version: str, kernel_mode: str = "optimized", benchmark_all: bool = False, budget_cap: float | None = None) -> None:
     from hashcat_bench.estimator import CostEstimator
     from hashcat_bench.provider import VastProvider
     gpu_file = data_dir / "gpu-models.json"
@@ -249,7 +259,7 @@ def bench_matrix_cmd(data_dir: Path, hashcat_version: str, kernel_mode: str = "o
     for slug in missing_slugs:
         print(f"\n--- {slug} ---")
         try:
-            bench_cmd(data_dir, slug, hashcat_version, kernel_mode)
+            bench_cmd(data_dir, slug, hashcat_version, kernel_mode, benchmark_all)
             succeeded.append(slug)
         except Exception as e:
             print(f"  FAILED: {e}", file=sys.stderr)
@@ -313,9 +323,11 @@ def main() -> None:
     p_bench.add_argument("--gpu", required=True, help="GPU slug")
     p_bench.add_argument("--hashcat", required=True, help="Hashcat version")
     p_bench.add_argument("--kernel-mode", default="optimized", choices=["optimized", "default"])
+    p_bench.add_argument("--benchmark-all", action="store_true", help="Use --benchmark-all (all hash modes including slow ones)")
     p_bm = sub.add_parser("bench-matrix", help="Run benchmarks for all GPUs")
     p_bm.add_argument("--hashcat", required=True, help="Hashcat version")
     p_bm.add_argument("--kernel-mode", default="optimized", choices=["optimized", "default"])
+    p_bm.add_argument("--benchmark-all", action="store_true", help="Use --benchmark-all (all hash modes including slow ones)")
     p_bm.add_argument("--budget-cap", type=float, help="Max $ to spend")
     sub.add_parser("cleanup", help="List and destroy any active Vast.ai instances")
     args = parser.parse_args()
@@ -336,8 +348,8 @@ def main() -> None:
     elif args.command == "estimate-matrix":
         estimate_matrix_cmd(args.data_dir, args.hashcat)
     elif args.command == "bench":
-        bench_cmd(args.data_dir, args.gpu, args.hashcat, args.kernel_mode)
+        bench_cmd(args.data_dir, args.gpu, args.hashcat, args.kernel_mode, args.benchmark_all)
     elif args.command == "bench-matrix":
-        bench_matrix_cmd(args.data_dir, args.hashcat, args.kernel_mode, args.budget_cap)
+        bench_matrix_cmd(args.data_dir, args.hashcat, args.kernel_mode, args.benchmark_all, args.budget_cap)
     elif args.command == "cleanup":
         cleanup_cmd()

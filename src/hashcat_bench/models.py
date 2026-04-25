@@ -33,6 +33,7 @@ class BenchmarkResult:
     cuda_version: str
     kernel_mode: str
     benchmark_date: str
+    benchmark_scope: str = "standard"
     benchmarks: list[BenchmarkEntry] = field(default_factory=list)
     host: HostInfo = field(default_factory=HostInfo)
 
@@ -41,6 +42,8 @@ class BenchmarkResult:
         slug = re.sub(r"[^a-z0-9]+", "-", self.gpu_model.lower()).strip("-")
         if self.kernel_mode == "default":
             slug += "-default"
+        if self.benchmark_scope == "all":
+            slug += "-all"
         return slug
 
     def to_dict(self) -> dict:
@@ -59,6 +62,7 @@ class BenchmarkResult:
             cuda_version=d["cuda_version"],
             kernel_mode=d["kernel_mode"],
             benchmark_date=d["benchmark_date"],
+            benchmark_scope=d.get("benchmark_scope", "standard"),
             benchmarks=benchmarks,
             host=host,
         )

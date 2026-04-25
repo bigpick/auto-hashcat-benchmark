@@ -4,13 +4,13 @@
 
 **Apples-to-apples GPU speed benchmarks for [hashcat](https://github.com/hashcat/hashcat)**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/hashcat-benchmarks/deploy.yml?branch=main&style=flat-square&label=build)](https://github.com/YOUR_USERNAME/hashcat-benchmarks/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/bigpick/auto-hashcat-benchmark/deploy.yml?branch=main&style=flat-square&label=build)](https://github.com/bigpick/auto-hashcat-benchmark/actions)
 [![Python](https://img.shields.io/badge/python-3.12+-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Svelte](https://img.shields.io/badge/svelte-5-ff3e00?style=flat-square&logo=svelte&logoColor=white)](https://svelte.dev/)
 [![GPUs](https://img.shields.io/badge/GPUs-14-f59e0b?style=flat-square)]()
 [![Vast.ai](https://img.shields.io/badge/powered%20by-vast.ai-6366f1?style=flat-square)](https://vast.ai)
 
-[**Live Dashboard**](https://YOUR_USERNAME.github.io/hashcat-benchmarks) · [Development Guide](DEVELOPMENT.md) · [Request a GPU](https://github.com/YOUR_USERNAME/hashcat-benchmarks/issues/new)
+[**Live Dashboard**](https://bigpick.github.io/auto-hashcat-benchmark) · [Development Guide](DEVELOPMENT.md) · [Request a GPU](https://github.com/bigpick/auto-hashcat-benchmark/issues/new)
 
 </div>
 
@@ -61,7 +61,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full setup walkthrough.
 | **RTX 40** (Ada Lovelace) | 4090, 4080, 4070 Ti, 4070, 4060 Ti, 4060 |
 | **RTX 30** (Ampere) | 3090, 3080, 3070, 3060 |
 
-RTX 10/20 series, AMD, and datacenter GPUs (A100, H100) can be added if they are available on Vast.ai at a reasonable price. [Open an issue](https://github.com/YOUR_USERNAME/hashcat-benchmarks/issues/new) to request one.
+RTX 10/20 series, AMD, and datacenter GPUs (A100, H100) can be added if they are available on Vast.ai at a reasonable price. [Open an issue](https://github.com/bigpick/auto-hashcat-benchmark/issues/new) to request one.
 
 ## The dashboard
 

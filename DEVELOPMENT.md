@@ -31,7 +31,7 @@ just lint --all-files
 ## Project Structure
 
 ```
-hashcat-benchmarks/
+auto-hashcat-benchmark/
 ├── src/hashcat_bench/       # Python CLI and orchestration
 │   ├── cli.py               # CLI entrypoint (argparse)
 │   ├── models.py            # Dataclasses: BenchmarkResult, GpuModel, etc.
@@ -167,7 +167,7 @@ Run `just list-gpus` to verify Vast.ai has instances available for the new model
 | Variable | Purpose | Required |
 |----------|---------|----------|
 | `VAST_API_KEY` | Vast.ai API authentication | For benchmarking |
-| `HASHCAT_BENCH_REGISTRY` | Container registry (default: `ghcr.io/YOUR_USERNAME/hashcat-bench`) | For container push |
+| `HASHCAT_BENCH_REGISTRY` | Container registry (default: `ghcr.io/bigpick/hashcat-bench`) | For container push |
 
 ## Data Schema
 

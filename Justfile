@@ -51,7 +51,7 @@ estimate-matrix HASHCAT:
 
 # --- Container ---
 
-registry := env("HASHCAT_BENCH_REGISTRY", "ghcr.io/YOUR_USERNAME/hashcat-bench")
+registry := env("HASHCAT_BENCH_REGISTRY", "ghcr.io/bigpick/hashcat-bench")
 cuda_version := "12.9.1"
 
 build-image HASHCAT_VERSION:

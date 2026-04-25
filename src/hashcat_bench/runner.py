@@ -20,6 +20,7 @@ class BenchmarkRunner:
         image: str,
         hashcat_version: str,
         kernel_mode: str = "optimized",
+        benchmark_all: bool = False,
         cuda_version: str = "12.9.1",
     ) -> BenchmarkResult:
         offer = self._provider.cheapest_offer(vastai_name)
@@ -28,6 +29,7 @@ class BenchmarkRunner:
         env = {
             "HASHCAT_VERSION": hashcat_version,
             "KERNEL_MODE": kernel_mode,
+            "BENCHMARK_ALL": "true" if benchmark_all else "false",
             "CUDA_VERSION": cuda_version,
             "CONTAINER_IMAGE": image,
         }

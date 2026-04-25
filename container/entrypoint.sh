@@ -2,6 +2,7 @@
 set -euo pipefail
 
 KERNEL_MODE="${KERNEL_MODE:-optimized}"
+BENCHMARK_ALL="${BENCHMARK_ALL:-false}"
 HASHCAT_VERSION="${HASHCAT_VERSION:-unknown}"
 CONTAINER_IMAGE="${CONTAINER_IMAGE:-unknown}"
 CUDA_VERSION="${CUDA_VERSION:-12.9.1}"
@@ -31,7 +32,12 @@ pcie_gen=$(echo "$pcie_info" | cut -d',' -f1 | xargs)
 pcie_width=$(echo "$pcie_info" | cut -d',' -f2 | xargs)
 
 # Run benchmark
-hashcat_flags="-b --machine-readable"
+hashcat_flags="--machine-readable"
+if [ "$BENCHMARK_ALL" = "true" ]; then
+    hashcat_flags="$hashcat_flags --benchmark-all"
+else
+    hashcat_flags="$hashcat_flags -b"
+fi
 if [ "$KERNEL_MODE" = "optimized" ]; then
     hashcat_flags="$hashcat_flags -O"
 fi
