@@ -17,16 +17,26 @@ MAX_WAIT_SECONDS = 1800
 def _resolve_ssh_key_path() -> Path:
     env_path = os.environ.get("HASHCAT_BENCH_SSH_KEY")
     if env_path:
-        priv = Path(env_path)
+        priv = Path(env_path).expanduser()
         if priv.suffix == ".pub":
             priv = priv.with_suffix("")
         if priv.exists():
             return priv
 
-    for name in ("id_ed25519", "id_rsa"):
-        path = Path.home() / ".ssh" / name
+    ssh_dir = Path.home() / ".ssh"
+    for name in ("id_ed25519_vast_ai", "id_ed25519", "id_rsa"):
+        path = ssh_dir / name
         if path.exists():
             return path
+
+    keys = list(ssh_dir.glob("id_*")) if ssh_dir.exists() else []
+    private_keys = [k for k in keys if not k.suffix == ".pub"]
+    if private_keys:
+        raise RuntimeError(
+            f"No SSH key found at standard paths. Found these keys: "
+            f"{', '.join(k.name for k in private_keys)}. "
+            f"Set HASHCAT_BENCH_SSH_KEY to the correct one."
+        )
 
     raise RuntimeError(
         "No SSH private key found. Set HASHCAT_BENCH_SSH_KEY or ensure "
@@ -47,6 +57,8 @@ class BenchmarkRunner:
         benchmark_all: bool = False,
         cuda_version: str = "12.9.1",
     ) -> BenchmarkResult:
+        key_path = _resolve_ssh_key_path()
+        print(f"  Using SSH key: {key_path}")
         self._provider.ensure_ssh_key()
 
         offer = self._provider.cheapest_offer(vastai_name)
@@ -120,10 +132,67 @@ class BenchmarkRunner:
 
     def _collect_results(self, host: str, port: int) -> str:
         key_path = _resolve_ssh_key_path()
-        max_ssh_attempts = 12
-        ssh_retry_delay = 15
+        poll_interval = 30
+        max_wait = MAX_WAIT_SECONDS
+        start = time.time()
 
-        for attempt in range(1, max_ssh_attempts + 1):
+        conn = self._ssh_connect_with_retry(host, port, key_path)
+        try:
+            while time.time() - start < max_wait:
+                elapsed = int(time.time() - start)
+
+                _, stdout, _ = conn.exec_command("cat /tmp/result.json 2>/dev/null", timeout=30)
+                output = stdout.read().decode()
+                if output.strip():
+                    return output
+
+                _, stdout, _ = conn.exec_command(
+                    "pgrep -f 'hashcat' >/dev/null 2>&1 && echo RUNNING || echo DONE",
+                    timeout=15,
+                )
+                proc_status = stdout.read().decode().strip()
+
+                if proc_status == "RUNNING":
+                    detail = ""
+                    try:
+                        _, stdout, _ = conn.exec_command(
+                            "nvidia-smi --query-gpu=utilization.gpu,temperature.gpu "
+                            "--format=csv,noheader,nounits 2>/dev/null",
+                            timeout=10,
+                        )
+                        gpu_info = stdout.read().decode().strip()
+                        if gpu_info:
+                            parts = gpu_info.split(",")
+                            gpu_util = parts[0].strip()
+                            gpu_temp = parts[1].strip() if len(parts) > 1 else "?"
+                            detail = f" (GPU: {gpu_util}%, {gpu_temp}C)"
+                    except Exception:
+                        pass
+                    print(f"  [{elapsed}s] benchmark in progress{detail}    ", end="\r")
+                elif proc_status == "DONE":
+                    _, stdout, _ = conn.exec_command("cat /tmp/result.json 2>/dev/null", timeout=30)
+                    output = stdout.read().decode()
+                    if output.strip():
+                        print()
+                        return output
+                    print()
+                    raise RuntimeError(
+                        "Benchmark finished but no result.json found. "
+                        "The entrypoint may have failed."
+                    )
+
+                time.sleep(poll_interval)
+
+            print()
+            raise TimeoutError(f"Benchmark did not complete within {max_wait}s")
+        finally:
+            conn.close()
+
+    def _ssh_connect_with_retry(self, host: str, port: int, key_path: Path) -> paramiko.SSHClient:
+        max_attempts = 10
+        retry_delay = 15
+
+        for attempt in range(1, max_attempts + 1):
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             try:
@@ -135,21 +204,11 @@ class BenchmarkRunner:
                     timeout=30,
                     banner_timeout=30,
                 )
-                _, stdout, stderr = client.exec_command("cat /tmp/result.json", timeout=120)
-                output = stdout.read().decode()
-                if not output.strip():
-                    err = stderr.read().decode()
-                    if attempt < max_ssh_attempts:
-                        print(f"  result.json not ready yet (attempt {attempt}/{max_ssh_attempts}), waiting...")
-                        time.sleep(ssh_retry_delay)
-                        continue
-                    raise RuntimeError(f"No result.json found on instance after {max_ssh_attempts} attempts. stderr: {err}")
-                return output
+                return client
             except (paramiko.SSHException, OSError, EOFError) as e:
-                if attempt < max_ssh_attempts:
-                    print(f"  SSH not ready (attempt {attempt}/{max_ssh_attempts}): {e}")
-                    time.sleep(ssh_retry_delay)
-                    continue
-                raise RuntimeError(f"SSH connection failed after {max_ssh_attempts} attempts: {e}")
-            finally:
                 client.close()
+                if attempt < max_attempts:
+                    print(f"  SSH not ready (attempt {attempt}/{max_attempts}): {e}")
+                    time.sleep(retry_delay)
+                    continue
+                raise RuntimeError(f"SSH connection failed after {max_attempts} attempts: {e}")

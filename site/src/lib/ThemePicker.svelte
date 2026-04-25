@@ -7,11 +7,11 @@
 
   let currentName = $derived(THEME_META[currentTheme]?.name ?? 'Dark');
 
-  let basicThemes = $derived(
-    Object.entries(THEME_META).filter(([, m]) => m.group === 'basic')
+  let darkThemes = $derived(
+    Object.entries(THEME_META).filter(([, m]) => m.group === 'dark')
   );
-  let popularThemes = $derived(
-    Object.entries(THEME_META).filter(([, m]) => m.group === 'popular')
+  let lightThemes = $derived(
+    Object.entries(THEME_META).filter(([, m]) => m.group === 'light')
   );
 
   function select(id) {
@@ -53,8 +53,8 @@
 
   {#if open}
     <div class="theme-dropdown">
-      <div class="theme-group-label">Basic</div>
-      {#each basicThemes as [id, meta]}
+      <div class="theme-group-label">Dark</div>
+      {#each darkThemes as [id, meta]}
         <button
           type="button"
           class="theme-option"
@@ -66,8 +66,8 @@
         </button>
       {/each}
 
-      <div class="theme-group-label">Popular</div>
-      {#each popularThemes as [id, meta]}
+      <div class="theme-group-label">Light</div>
+      {#each lightThemes as [id, meta]}
         <button
           type="button"
           class="theme-option"

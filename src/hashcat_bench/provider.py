@@ -63,19 +63,22 @@ class VastProvider:
 
     def ensure_ssh_key(self, pub_key_path: Path | None = None) -> str:
         if pub_key_path is None:
-            pub_key_path = Path(os.environ.get(
-                "HASHCAT_BENCH_SSH_KEY",
-                str(Path.home() / ".ssh" / "id_ed25519.pub"),
-            ))
-        if not pub_key_path.exists():
-            alt = pub_key_path.parent / "id_rsa.pub"
-            if alt.exists():
-                pub_key_path = alt
+            env_val = os.environ.get("HASHCAT_BENCH_SSH_KEY")
+            if env_val:
+                pub_key_path = Path(env_val).expanduser()
+                if not pub_key_path.suffix == ".pub":
+                    pub_key_path = pub_key_path.with_suffix(".pub")
             else:
-                raise RuntimeError(
-                    f"No SSH public key found at {pub_key_path} or {alt}. "
-                    "Generate one with: ssh-keygen -t ed25519"
-                )
+                ssh_dir = Path.home() / ".ssh"
+                for name in ("id_ed25519_vast_ai.pub", "id_ed25519.pub", "id_rsa.pub"):
+                    candidate = ssh_dir / name
+                    if candidate.exists():
+                        pub_key_path = candidate
+                        break
+        if pub_key_path is None or not pub_key_path.exists():
+            raise RuntimeError(
+                f"No SSH public key found. Set HASHCAT_BENCH_SSH_KEY to your key path."
+            )
 
         pub_key = pub_key_path.read_text().strip()
         key_fingerprint = pub_key.split()[1][:20] if len(pub_key.split()) >= 2 else pub_key[:20]
