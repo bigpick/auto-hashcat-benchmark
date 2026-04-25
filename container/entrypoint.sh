@@ -42,7 +42,14 @@ if [ "$KERNEL_MODE" = "optimized" ]; then
     hashcat_flags="$hashcat_flags -O"
 fi
 
-benchmark_output=$($HASHCAT_BIN $hashcat_flags 2>/dev/null || true)
+echo "Running: $HASHCAT_BIN $hashcat_flags" >&2
+benchmark_output=$($HASHCAT_BIN $hashcat_flags 2>/tmp/hashcat_stderr.log)
+hashcat_exit=$?
+if [ $hashcat_exit -ne 0 ]; then
+    echo "ERROR: hashcat exited with code $hashcat_exit" >&2
+    cat /tmp/hashcat_stderr.log >&2
+    exit $hashcat_exit
+fi
 
 benchmark_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 

@@ -147,12 +147,16 @@ class BenchmarkRunner:
                     return output
 
                 _, stdout, _ = conn.exec_command(
-                    "pgrep -f 'hashcat' >/dev/null 2>&1 && echo RUNNING || echo DONE",
+                    "pgrep -x hashcat >/dev/null 2>&1 && echo HASHCAT_RUNNING; "
+                    "pgrep -f entrypoint >/dev/null 2>&1 && echo ENTRYPOINT_RUNNING; "
+                    "echo CHECK_DONE",
                     timeout=15,
                 )
-                proc_status = stdout.read().decode().strip()
+                proc_output = stdout.read().decode().strip()
+                hashcat_running = "HASHCAT_RUNNING" in proc_output
+                entrypoint_running = "ENTRYPOINT_RUNNING" in proc_output
 
-                if proc_status == "RUNNING":
+                if hashcat_running or entrypoint_running:
                     detail = ""
                     try:
                         _, stdout, _ = conn.exec_command(
@@ -165,20 +169,35 @@ class BenchmarkRunner:
                             parts = gpu_info.split(",")
                             gpu_util = parts[0].strip()
                             gpu_temp = parts[1].strip() if len(parts) > 1 else "?"
-                            detail = f" (GPU: {gpu_util}%, {gpu_temp}C)"
+                            detail = f" GPU: {gpu_util}%, {gpu_temp}C"
                     except Exception:
                         pass
-                    print(f"  [{elapsed}s] benchmark in progress{detail}    ", end="\r")
-                elif proc_status == "DONE":
+
+                    if hashcat_running:
+                        phase = "hashcat running"
+                    else:
+                        phase = "entrypoint running (pre-benchmark)"
+                    print(f"  [{elapsed}s] {phase}{' -' + detail if detail else ''}    ", end="\r")
+                else:
                     _, stdout, _ = conn.exec_command("cat /tmp/result.json 2>/dev/null", timeout=30)
                     output = stdout.read().decode()
                     if output.strip():
                         print()
                         return output
+                    diag = ""
+                    try:
+                        _, stdout, _ = conn.exec_command(
+                            "ls -la /tmp/result.json 2>&1; echo '---'; "
+                            "ps aux 2>&1 | head -20",
+                            timeout=15,
+                        )
+                        diag = stdout.read().decode().strip()
+                    except Exception:
+                        pass
                     print()
                     raise RuntimeError(
                         "Benchmark finished but no result.json found. "
-                        "The entrypoint may have failed."
+                        f"Diagnostics:\n{diag}"
                     )
 
                 time.sleep(poll_interval)
