@@ -11,7 +11,9 @@ from hashcat_bench.models import BenchmarkResult
 from hashcat_bench.provider import VastProvider
 
 POLL_INTERVAL_SECONDS = 15
-MAX_WAIT_SECONDS = 1800
+INSTANCE_READY_MAX_WAIT_SECONDS = 1800
+BENCHMARK_MAX_WAIT_SECONDS = 14400
+BENCHMARK_STALE_TIMEOUT_SECONDS = 900
 
 
 def _resolve_ssh_key_path() -> Path:
@@ -80,10 +82,21 @@ class BenchmarkRunner:
             "CONTAINER_IMAGE": image,
         }
 
+        onstart_cmd = (
+            "sleep 2; "
+            "chmod 700 /root/.ssh; "
+            "chown -R root:root /root/.ssh; "
+            "chmod 600 /root/.ssh/authorized_keys 2>/dev/null; "
+            "ls -la /root/.ssh/ > /var/log/ssh_setup.log 2>&1; "
+            "env | grep _ >> /etc/environment; "
+            "nohup /entrypoint.sh > /var/log/entrypoint.log 2>&1 &"
+        )
+
         instance_id = self._provider.create_instance(
             offer_id=offer["id"],
             image=image,
             env=env,
+            onstart_cmd=onstart_cmd,
         )
         print(f"  Instance {instance_id} created (offer {offer['id']}, ${offer['dph_total']:.3f}/hr)")
 
@@ -151,7 +164,7 @@ class BenchmarkRunner:
         last_change = time.time()
         stale_timeout = 600
 
-        while time.time() - start < MAX_WAIT_SECONDS:
+        while time.time() - start < INSTANCE_READY_MAX_WAIT_SECONDS:
             status = self._provider.instance_status(instance_id)
             actual = status.get("actual_status", "unknown")
             status_msg = status.get("status_msg", "")
@@ -183,13 +196,15 @@ class BenchmarkRunner:
                 )
 
             time.sleep(POLL_INTERVAL_SECONDS)
-        raise TimeoutError(f"Instance {instance_id} did not become ready within {MAX_WAIT_SECONDS}s")
+        raise TimeoutError(f"Instance {instance_id} did not become ready within {INSTANCE_READY_MAX_WAIT_SECONDS}s")
 
     def _collect_results(self, host: str, port: int) -> str:
         key_path = _resolve_ssh_key_path()
         poll_interval = 30
-        max_wait = MAX_WAIT_SECONDS
+        max_wait = BENCHMARK_MAX_WAIT_SECONDS
         start = time.time()
+        last_stderr_size = 0
+        last_progress_change = time.time()
 
         conn = self._ssh_connect_with_retry(host, port, key_path)
         try:
@@ -203,15 +218,17 @@ class BenchmarkRunner:
 
                 _, stdout, _ = conn.exec_command(
                     "pgrep -x hashcat >/dev/null 2>&1 && echo HASHCAT_RUNNING; "
-                    "pgrep -f entrypoint >/dev/null 2>&1 && echo ENTRYPOINT_RUNNING; "
+                    "[ -f /tmp/entrypoint_running ] && echo ENTRYPOINT_RUNNING; "
+                    "[ -f /tmp/parsing_results ] && echo PARSING_RESULTS; "
                     "echo CHECK_DONE",
                     timeout=15,
                 )
                 proc_output = stdout.read().decode().strip()
                 hashcat_running = "HASHCAT_RUNNING" in proc_output
                 entrypoint_running = "ENTRYPOINT_RUNNING" in proc_output
+                parsing_results = "PARSING_RESULTS" in proc_output
 
-                if hashcat_running or entrypoint_running:
+                if hashcat_running or entrypoint_running or parsing_results:
                     detail = ""
                     try:
                         _, stdout, _ = conn.exec_command(
@@ -228,11 +245,63 @@ class BenchmarkRunner:
                     except Exception:
                         pass
 
+                    hashcat_progress = ""
+                    stderr_size = 0
+                    try:
+                        _, stdout, _ = conn.exec_command(
+                            "stat -c %s /tmp/hashcat_stderr.log 2>/dev/null; "
+                            "echo '==='; "
+                            "stat -c %s /tmp/hashcat_stdout.log 2>/dev/null; "
+                            "echo '==='; "
+                            "tail -2 /tmp/hashcat_stdout.log 2>/dev/null; "
+                            "echo '==='; "
+                            "tail -2 /tmp/hashcat_stderr.log 2>/dev/null",
+                            timeout=10,
+                        )
+                        raw = stdout.read().decode()
+                        parts = raw.split("===")
+                        if len(parts) >= 4:
+                            err_size_str = parts[0].strip()
+                            out_size_str = parts[1].strip()
+                            stdout_tail = parts[2].strip()
+                            stderr_tail = parts[3].strip()
+                            err_size = int(err_size_str) if err_size_str.isdigit() else 0
+                            out_size = int(out_size_str) if out_size_str.isdigit() else 0
+                            stderr_size = err_size + out_size
+                            sections = []
+                            if stdout_tail:
+                                sections.append(stdout_tail)
+                            if stderr_tail:
+                                sections.append(stderr_tail)
+                            hashcat_progress = "\n".join(sections)
+                    except Exception:
+                        pass
+
+                    if stderr_size > last_stderr_size:
+                        last_stderr_size = stderr_size
+                        last_progress_change = time.time()
+                    elif time.time() - last_progress_change > BENCHMARK_STALE_TIMEOUT_SECONDS:
+                        print()
+                        raise RuntimeError(
+                            f"Benchmark stalled: no hashcat progress for "
+                            f"{BENCHMARK_STALE_TIMEOUT_SECONDS // 60} minutes "
+                            f"(stderr stuck at {stderr_size} bytes). "
+                            f"Last output:\n{hashcat_progress}"
+                        )
+
                     if hashcat_running:
                         phase = "hashcat running"
+                    elif parsing_results:
+                        phase = "parsing results (post-benchmark)"
                     else:
-                        phase = "entrypoint running (pre-benchmark)"
-                    print(f"  [{elapsed}s] {phase}{' -' + detail if detail else ''}    ", end="\r")
+                        phase = "entrypoint starting (pre-benchmark)"
+                    header = f"  [{elapsed}s] {phase}{' -' + detail if detail else ''}"
+                    if hashcat_progress:
+                        print(f"{header}")
+                        for line in hashcat_progress.splitlines():
+                            print(f"    {line}")
+                    else:
+                        print(f"{header}    ", end="\r")
                 else:
                     _, stdout, _ = conn.exec_command("cat /tmp/result.json 2>/dev/null", timeout=30)
                     output = stdout.read().decode()
@@ -242,7 +311,13 @@ class BenchmarkRunner:
                     diag = ""
                     try:
                         _, stdout, _ = conn.exec_command(
-                            "ls -la /tmp/result.json 2>&1; echo '---'; "
+                            "echo '=== result.json ==='; "
+                            "ls -la /tmp/result.json 2>&1; "
+                            "echo '=== entrypoint log (last 20) ==='; "
+                            "tail -20 /var/log/entrypoint.log 2>&1; "
+                            "echo '=== hashcat stderr (last 20) ==='; "
+                            "tail -20 /tmp/hashcat_stderr.log 2>&1; "
+                            "echo '=== processes ==='; "
                             "ps aux 2>&1 | head -20",
                             timeout=15,
                         )

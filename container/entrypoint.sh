@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Marker file so the orchestrator can reliably detect entrypoint state
+# without false positives from pgrep matching the SSH command itself.
+touch /tmp/entrypoint_running
+trap 'rm -f /tmp/entrypoint_running' EXIT
+
 KERNEL_MODE="${KERNEL_MODE:-optimized}"
 BENCHMARK_ALL="${BENCHMARK_ALL:-false}"
 HASHCAT_VERSION="${HASHCAT_VERSION:-unknown}"
@@ -43,21 +48,35 @@ if [ "$KERNEL_MODE" = "optimized" ]; then
 fi
 
 echo "Running: $HASHCAT_BIN $hashcat_flags" >&2
-benchmark_output=$($HASHCAT_BIN $hashcat_flags 2>/tmp/hashcat_stderr.log)
+set +e
+stdbuf -oL -eL "$HASHCAT_BIN" $hashcat_flags \
+    >/tmp/hashcat_stdout.log \
+    2>/tmp/hashcat_stderr.log
 hashcat_exit=$?
+set -e
 if [ $hashcat_exit -ne 0 ]; then
-    echo "ERROR: hashcat exited with code $hashcat_exit" >&2
-    cat /tmp/hashcat_stderr.log >&2
-    exit $hashcat_exit
+    echo "WARNING: hashcat exited with code $hashcat_exit (continuing to parse partial results)" >&2
+    tail -20 /tmp/hashcat_stderr.log >&2
 fi
 
 benchmark_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-benchmarks_json=$(echo "$benchmark_output" | grep -v '^#' | grep -v '^$' | while IFS=: read -r dev_id _f1 hash_mode exec_ms _f2 speed; do
-    exec_sec=$(echo "scale=1; $exec_ms / 1000" | bc)
-    printf '{"hash_mode":%s,"hash_name":"mode_%s","speed":%s,"exec_runtime_ms":%s}\n' \
-        "$hash_mode" "$hash_mode" "$speed" "$exec_sec"
-done | jq -s '.')
+touch /tmp/parsing_results
+
+# Parse hashcat --machine-readable output (format: dev_id:?:hash_mode:exec_ms:?:speed)
+# Single jq invocation - no bash loops, no bc subshells. Skips empty/comment/malformed lines.
+benchmarks_json=$(jq -R -s '
+    split("\n")
+    | map(select(length > 0 and (startswith("#") | not)))
+    | map(split(":"))
+    | map(select(length == 6))
+    | map({
+        hash_mode: (.[2] | tonumber? // 0),
+        hash_name: ("mode_" + .[2]),
+        speed: (.[5] | tonumber? // 0),
+        exec_runtime_ms: (.[3] | tonumber? // 0)
+    })
+' /tmp/hashcat_stdout.log)
 
 jq -n \
     --arg hv "$HASHCAT_VERSION" \

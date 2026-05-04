@@ -31,6 +31,8 @@ RUN git clone https://github.com/hashcat/hashcat.git /root/hashcat && \
     make install && \
     rm -rf /root/hashcat/.git
 
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

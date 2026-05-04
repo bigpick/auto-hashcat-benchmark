@@ -103,14 +103,23 @@ class VastProvider:
 
         return pub_key
 
-    def create_instance(self, offer_id: int, image: str, env: dict[str, str] | None = None) -> int:
+    def create_instance(
+        self,
+        offer_id: int,
+        image: str,
+        env: dict[str, str] | None = None,
+        onstart_cmd: str | None = None,
+    ) -> int:
+        kwargs: dict = dict(
+            id=offer_id,
+            image=image,
+            disk=20,
+            env=env or {},
+        )
+        if onstart_cmd:
+            kwargs["onstart_cmd"] = onstart_cmd
         try:
-            result = self._sdk.create_instance(
-                id=offer_id,
-                image=image,
-                disk=20,
-                env=env or {},
-            )
+            result = self._sdk.create_instance(**kwargs)
         except Exception as e:
             raise RuntimeError(_sanitize_error(e)) from None
         return result["new_contract"]
