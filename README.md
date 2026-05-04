@@ -7,7 +7,7 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/bigpick/auto-hashcat-benchmark/deploy.yml?branch=main&style=flat-square&label=build)](https://github.com/bigpick/auto-hashcat-benchmark/actions)
 [![Python](https://img.shields.io/badge/python-3.12+-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Svelte](https://img.shields.io/badge/svelte-5-ff3e00?style=flat-square&logo=svelte&logoColor=white)](https://svelte.dev/)
-[![GPUs](https://img.shields.io/badge/GPUs-14-f59e0b?style=flat-square)]()
+[![GPUs](https://img.shields.io/badge/GPUs-101-f59e0b?style=flat-square)]()
 [![Vast.ai](https://img.shields.io/badge/powered%20by-vast.ai-6366f1?style=flat-square)](https://vast.ai)
 
 [**Live Dashboard**](https://bigpick.github.io/auto-hashcat-benchmark) · [Development Guide](DEVELOPMENT.md) · [Request a GPU](https://github.com/bigpick/auto-hashcat-benchmark/issues/new)
@@ -29,8 +29,8 @@ This project runs every benchmark inside the same Docker container (same hashcat
 │  just bench rtx-4090 v6.2.6                               │
 │    → Search Vast.ai for cheapest RTX 4090                 │
 │    → Rent instance, run Docker container                  │
-│    → Collect JSON results, destroy instance                │
-│    → Save to data/results/v6.2.6/rtx-4090.json           │
+│    → Collect JSON results, destroy instance               │
+│    → Save to data/results/v6.2.6/rtx-4090.json            │
 └───────────────────────────────────────────────────────────┘
           │ git push
           ▼
@@ -45,9 +45,10 @@ The orchestrator checks for existing results before renting anything. If a resul
 
 ```bash
 just setup                        # install everything
+just hashcat-versions             # see available hashcat versions
 just list-gpus                    # check GPU availability and prices
-just estimate-matrix v6.2.6       # cost estimate (no money spent)
-just bench rtx-4090 v6.2.6        # run one benchmark
+just estimate-matrix v7.1.2       # cost estimate (no money spent)
+just bench rtx-4090 v7.1.2        # run one benchmark
 just dev                          # preview the dashboard locally
 ```
 
@@ -55,13 +56,16 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full setup walkthrough.
 
 ## GPU coverage
 
-| Series | Models |
-|--------|--------|
-| **RTX 50** (Blackwell) | 5090, 5080, 5070 Ti, 5070 |
-| **RTX 40** (Ada Lovelace) | 4090, 4080, 4070 Ti, 4070, 4060 Ti, 4060 |
-| **RTX 30** (Ampere) | 3090, 3080, 3070, 3060 |
+101 GPU models tracked across every generation available on [Vast.ai](https://vast.ai):
 
-RTX 10/20 series, AMD, and datacenter GPUs (A100, H100) can be added if they are available on Vast.ai at a reasonable price. [Open an issue](https://github.com/bigpick/auto-hashcat-benchmark/issues/new) to request one.
+| Category | Families |
+|----------|----------|
+| **Consumer** | RTX 50, 40, 30, 20 series, GTX 16, 10, 900, 700 series |
+| **Datacenter** | H200, H100, B200, A100, A-series, L-series |
+| **Workstation** | RTX PRO Blackwell, RTX Ada, RTX Ax000, Quadro RTX/P |
+| **Titan** | Titan RTX, Titan V, Titan X, Titan Xp |
+
+Add more with `just add-gpu <family>` or `just add-gpu <name>`. Run `just gpu-families` to see all available families. [Open an issue](https://github.com/bigpick/auto-hashcat-benchmark/issues/new) to request one.
 
 ## The dashboard
 

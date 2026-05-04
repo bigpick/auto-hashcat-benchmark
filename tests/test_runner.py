@@ -1,17 +1,26 @@
 import json
-import time
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 from hashcat_bench.runner import BenchmarkRunner
+
 
 def _make_provider():
     provider = MagicMock()
-    provider.cheapest_offer.return_value = {"id": 100, "dph_total": 0.35}
+    provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
+    provider.search_gpu.return_value = [
+        {
+            "id": 100, "dph_total": 0.35, "gpu_name": "RTX_4090",
+            "reliability": 0.95, "cpu_ram": 32768,
+            "cpu_cores_effective": 8, "cuda_max_good": 12.9,
+            "geolocation": "US",
+        },
+    ]
     provider.create_instance.return_value = 789
     provider.instance_status.side_effect = [
         {"actual_status": "loading"},
         {"actual_status": "running", "ssh_host": "1.2.3.4", "ssh_port": 22222},
     ]
     return provider
+
 
 def test_run_calls_provider_lifecycle():
     provider = _make_provider()
@@ -24,21 +33,24 @@ def test_run_calls_provider_lifecycle():
     with patch.object(runner, "_collect_results", return_value=json.dumps(sample_result)):
         with patch("hashcat_bench.runner.time") as mock_time:
             mock_time.sleep = MagicMock()
-            mock_time.time = MagicMock(side_effect=[0, 10, 20, 30])
+            mock_time.time = MagicMock(side_effect=range(0, 100, 5))
             result = runner.run(
                 vastai_name="RTX 4090",
                 image="ghcr.io/user/hashcat-bench:v6.2.6-cuda12.2",
                 hashcat_version="v6.2.6",
                 kernel_mode="optimized",
             )
-    provider.cheapest_offer.assert_called_once_with("RTX 4090")
+    provider.ensure_ssh_key.assert_called_once()
+    provider.search_gpu.assert_called_once_with("RTX 4090")
     provider.create_instance.assert_called_once()
     provider.destroy_instance.assert_called_once_with(789)
     assert result.hashcat_version == "v6.2.6"
 
+
 def test_run_no_offers_raises():
     provider = MagicMock()
-    provider.cheapest_offer.return_value = None
+    provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
+    provider.search_gpu.return_value = []
     runner = BenchmarkRunner(provider=provider)
     try:
         runner.run(vastai_name="RTX 9999", image="img", hashcat_version="v6.2.6", kernel_mode="optimized")
@@ -46,16 +58,24 @@ def test_run_no_offers_raises():
     except RuntimeError as e:
         assert "No available offers" in str(e)
 
+
 def test_run_destroys_on_failure():
     provider = MagicMock()
-    provider.cheapest_offer.return_value = {"id": 100, "dph_total": 0.35}
+    provider.ensure_ssh_key.return_value = "ssh-ed25519 AAAA..."
+    provider.search_gpu.return_value = [
+        {
+            "id": 100, "dph_total": 0.35, "reliability": 0.95,
+            "cpu_ram": 32768, "cpu_cores_effective": 8,
+            "cuda_max_good": 12.9, "geolocation": "US",
+        },
+    ]
     provider.create_instance.return_value = 789
     provider.instance_status.side_effect = Exception("API error")
     runner = BenchmarkRunner(provider=provider)
     try:
         with patch("hashcat_bench.runner.time") as mock_time:
             mock_time.sleep = MagicMock()
-            mock_time.time = MagicMock(return_value=0)
+            mock_time.time = MagicMock(side_effect=range(0, 100, 5))
             runner.run(vastai_name="RTX 4090", image="img", hashcat_version="v6.2.6", kernel_mode="optimized")
         assert False, "Should have raised"
     except Exception:

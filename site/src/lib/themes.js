@@ -130,14 +130,14 @@ export const THEMES = {
 };
 
 export const THEME_META = {
-  dark: { name: 'Dark', group: 'basic' },
-  light: { name: 'Light', group: 'basic' },
-  dracula: { name: 'Dracula', group: 'popular' },
-  'catppuccin-mocha': { name: 'Catppuccin Mocha', group: 'popular' },
-  'catppuccin-latte': { name: 'Catppuccin Latte', group: 'popular' },
-  'tokyo-night': { name: 'Tokyo Night', group: 'popular' },
-  'github-dark': { name: 'GitHub Dark', group: 'popular' },
-  'github-light': { name: 'GitHub Light', group: 'popular' },
+  dark: { name: 'Dark', group: 'dark' },
+  dracula: { name: 'Dracula', group: 'dark' },
+  'catppuccin-mocha': { name: 'Catppuccin Mocha', group: 'dark' },
+  'tokyo-night': { name: 'Tokyo Night', group: 'dark' },
+  'github-dark': { name: 'GitHub Dark', group: 'dark' },
+  light: { name: 'Light', group: 'light' },
+  'catppuccin-latte': { name: 'Catppuccin Latte', group: 'light' },
+  'github-light': { name: 'GitHub Light', group: 'light' },
 };
 
 const LIGHT_THEMES = new Set(['light', 'catppuccin-latte', 'github-light']);

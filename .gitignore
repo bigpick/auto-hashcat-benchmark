@@ -19,3 +19,4 @@ data/index.json
 *.key
 id_rsa*
 *.secret
+docs/
